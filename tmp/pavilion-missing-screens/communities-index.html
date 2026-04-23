@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" class="[color-scheme:light]">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Communities — Mahjong Pavilion (reference)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            surface: "#f9faf3",
+            ink: "#1a1c18",
+            muted: "#3f4943",
+            line: "#e2e3dc",
+            primary: "#004e34",
+            primaryHi: "#006847",
+          },
+        },
+      },
+    };
+  </script>
+</head>
+<body class="min-h-screen bg-surface font-[Work_Sans,sans-serif] text-ink antialiased">
+  <nav class="sticky top-0 z-50 border-b border-primary/10 bg-surface/90 backdrop-blur-md">
+    <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <a href="#" class="flex items-center gap-2">
+        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-white shadow-md">M</span>
+        <span class="font-[family-name:Plus_Jakarta_Sans,sans-serif] text-lg font-extrabold tracking-tight text-primary">MAHJONG PAVILION</span>
+      </a>
+      <div class="hidden gap-4 text-sm font-medium md:flex">
+        <span class="rounded-md bg-[#edeee8] px-3 py-2 text-primary">Communities</span>
+        <a class="rounded-md px-3 py-2 text-muted hover:bg-[#edeee8] hover:text-primary" href="#">Players</a>
+        <a class="rounded-md border border-primary/25 px-3 py-2 font-bold text-primary" href="#">Leaderboard</a>
+        <a class="rounded-md px-3 py-2 text-muted hover:bg-[#edeee8]" href="#">Games</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="mx-auto max-w-7xl px-4 pb-16 pt-10 sm:px-6 lg:px-8">
+    <header class="mb-12 text-center">
+      <h1 class="font-[family-name:Plus_Jakarta_Sans,sans-serif] text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-primary to-primaryHi">Mahjong Communities</h1>
+      <p class="mt-4 text-xl text-muted">Join a community to participate in leagues and tournaments.</p>
+    </header>
+
+    <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+      <a href="#" class="group block rounded-2xl border border-line bg-[#edeee8] p-6 shadow-sm transition hover:border-primary/30 hover:shadow-md">
+        <div class="mb-4 flex items-center gap-4">
+          <div class="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-2xl font-bold text-white shadow-lg">C</div>
+          <div>
+            <h2 class="font-[family-name:Plus_Jakarta_Sans,sans-serif] text-xl font-bold text-ink group-hover:text-primary">Club Riichi Madrid</h2>
+            <p class="text-sm text-muted">24 members</p>
+          </div>
+        </div>
+        <p class="mb-4 line-clamp-3 text-sm text-muted">Weekly sessions and seasonal league. Open to new players.</p>
+        <div class="flex flex-wrap gap-2">
+          <span class="rounded border border-line bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted">riichi</span>
+          <span class="rounded border border-line bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted">mcr</span>
+        </div>
+      </a>
+      <a href="#" class="group block rounded-2xl border border-line bg-white p-6 shadow-sm ring-1 ring-black/5 transition hover:border-primary/30">
+        <div class="mb-4 flex items-center gap-4">
+          <div class="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primaryHi text-2xl font-bold text-white shadow-lg">V</div>
+          <div>
+            <h2 class="font-[family-name:Plus_Jakarta_Sans,sans-serif] text-xl font-bold group-hover:text-primary">Valencia Pavilion</h2>
+            <p class="text-sm text-muted">12 members</p>
+          </div>
+        </div>
+        <p class="mb-4 line-clamp-3 text-sm text-muted">Tournaments and teaching tables.</p>
+        <div class="flex flex-wrap gap-2">
+          <span class="rounded border border-line bg-[#f3f4ed] px-2 py-0.5 text-[10px] font-bold uppercase text-muted">riichi</span>
+        </div>
+      </a>
+      <a href="#" class="group block rounded-2xl border border-line bg-[#f3f4ed] p-6 shadow-sm transition hover:border-primary/30">
+        <div class="mb-4 flex items-center gap-4">
+          <div class="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#21619b] to-indigo-700 text-2xl font-bold text-white shadow-lg">B</div>
+          <div>
+            <h2 class="font-[family-name:Plus_Jakarta_Sans,sans-serif] text-xl font-bold group-hover:text-primary">Barcelona Open</h2>
+            <p class="text-sm text-muted">48 members</p>
+          </div>
+        </div>
+        <p class="mb-4 line-clamp-3 text-sm text-muted">Large community with events calendar and EMA-rated events.</p>
+        <div class="flex flex-wrap gap-2">
+          <span class="rounded border border-line bg-white px-2 py-0.5 text-[10px] font-bold uppercase text-muted">riichi</span>
+        </div>
+      </a>
+    </div>
+  </main>
+</body>
+</html>

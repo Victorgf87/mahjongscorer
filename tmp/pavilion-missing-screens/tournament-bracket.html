@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" class="[color-scheme:light]">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tournament bracket — Mahjong Pavilion (reference)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Work+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="min-h-screen bg-[#f9faf3] font-[Work_Sans,sans-serif] text-[#1a1c18]">
+  <header class="border-b border-[#e2e3dc] bg-white px-4 py-4">
+    <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4">
+      <div>
+        <p class="text-xs font-bold uppercase tracking-widest text-[#6f7a72]">Tournament</p>
+        <h1 class="font-[Plus_Jakarta_Sans,sans-serif] text-2xl font-extrabold text-[#004e34]">Spring Championship</h1>
+      </div>
+      <span class="rounded-full border border-[#004e34]/25 px-4 py-1.5 text-sm font-bold text-[#004e34]">Swiss · Riichi</span>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-7xl overflow-x-auto px-4 py-10">
+    <p class="mb-6 text-sm text-[#6f7a72]">Connector bars use soft outline (design system). Winner nodes use primary gradient.</p>
+    <div class="flex min-w-[720px] gap-8">
+      <div class="flex flex-col justify-around gap-4">
+        <div class="w-48 rounded-xl border border-[#e2e3dc] bg-white p-3 shadow-sm ring-1 ring-black/5">
+          <p class="text-xs font-bold text-[#6f7a72]">Table 1</p>
+          <p class="font-semibold">Player A</p>
+          <p class="text-xs text-[#6f7a72]">vs Player B</p>
+        </div>
+        <div class="w-48 rounded-xl border border-[#e2e3dc] bg-[#f3f4ed] p-3">
+          <p class="text-xs font-bold text-[#6f7a72]">Table 2</p>
+          <p class="font-semibold">Player C</p>
+          <p class="text-xs text-[#6f7a72]">vs Player D</p>
+        </div>
+      </div>
+      <div class="flex items-center">
+        <div class="h-0.5 w-8 bg-[#bec9c1]/40"></div>
+        <div class="w-52 rounded-xl bg-gradient-to-br from-[#004e34] to-[#006847] p-4 text-center text-white shadow-lg">
+          <p class="text-[10px] font-bold uppercase tracking-widest text-white/80">Final</p>
+          <p class="font-[Plus_Jakarta_Sans,sans-serif] text-lg font-extrabold">Player A</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
