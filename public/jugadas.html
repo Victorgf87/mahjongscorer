@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combinaciones y Jugadas de Mahjong | Scorer</title>
+    <style>
+        :root { --bg: #121212; --surface: #1e1e1e; --primary: #00c853; --text: #e0e0e0; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        nav { margin-bottom: 40px; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        nav a { color: var(--primary); text-decoration: none; margin-right: 20px; font-weight: bold; }
+        h1 { color: var(--primary); }
+        .tile-list { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .yaku-item { background: var(--surface); padding: 15px; border-radius: 15px; border-left: 4px solid var(--primary); }
+        h3 { margin-top: 0; color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="/">🏠 Calculadora</a>
+            <a href="/reglas">📖 Reglas</a>
+            <a href="/jugadas">🀄 Jugadas</a>
+        </nav>
+
+        <h1>Principales Jugadas</h1>
+        
+        <div class="tile-list">
+            <div class="yaku-item">
+                <h3>Tanyao (Todo Simples)</h3>
+                <p>Una mano sin terminales (1 o 9) ni honores (vientos/dragones).</p>
+            </div>
+            <div class="yaku-item">
+                <h3>Pinfu</h3>
+                <p>Mano compuesta únicamente por secuencias (chows) y una espera abierta.</p>
+            </div>
+            <div class="yaku-item">
+                <h3>Siete Pares</h3>
+                <p>Una mano especial formada por 7 parejas diferentes.</p>
+            </div>
+            <div class="yaku-item">
+                <h3>Dora</h3>
+                <p>Fichas especiales que valen un Han extra cada una.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

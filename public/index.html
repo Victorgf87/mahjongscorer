@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mahjong Scorer v4.7 PRO</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3406/3406059.png">
+    <meta name="theme-color" content="#121212">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1338580016730480" crossorigin="anonymous"></script>
+    <meta name="google-adsense-account" content="ca-pub-1338580016730480">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="google-site-verification" content="rmyy-xRKhjbY5KowBBn7yI97rKPM1aJo7T83bvsS4iU" />
+    <style>
+        :root {
+            --bg: #121212; --surface: #1e1e1e; --primary: #00c853;
+            --text: #e0e0e0; --text-dim: #9e9e9e; --danger: #ff5252;
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg); color: var(--text); margin: 0;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+            padding: env(safe-area-inset-top) 20px env(safe-area-inset-bottom);
+        }
+
+        .app-layout { display: grid; grid-template-columns: 1fr; width: 100%; max-width: 1200px; gap: 30px; }
+        @media (min-width: 1024px) { .app-layout { grid-template-columns: 320px 1fr 320px; padding-top: 60px; } }
+        
+        .sidebar { order: 2; display: flex; flex-direction: column; gap: 20px; width: 100%; }
+        @media (min-width: 1024px) { .sidebar { order: 1; position: sticky; top: 60px; } }
+        
+        /* CONTENEDOR DEL TIP WIDGET */
+        .kofi-tip-container {
+            background: rgba(255,255,255,0.02);
+            border-radius: 24px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+        }
+
+        .main-container { order: 1; display: flex; flex-direction: column; align-items: center; width: 100%; }
+        .header { width: 100%; text-align: center; margin-bottom: 20px; }
+        h1 { font-size: 2rem; margin: 0; }
+        h1 span { color: var(--primary); }
+        .main-nav { margin: 15px 0; display: flex; gap: 20px; justify-content: center; }
+        .main-nav a { color: var(--primary); text-decoration: none; font-size: 0.9rem; font-weight: 600; opacity: 0.7; }
+        
+        .record-section { margin: 40px 0; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .record-btn {
+            width: 160px; height: 160px; border-radius: 40px; border: none;
+            background: #f5f5f5; box-shadow: 0 10px 0 #ccc, 0 20px 40px rgba(0,0,0,0.4);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.1s;
+        }
+        .record-btn.recording { background: var(--danger); box-shadow: 0 8px 0 #b33939; transform: translateY(4px); }
+        .record-btn.processing { opacity: 0.5; pointer-events: none; transform: scale(0.95); }
+        #status { font-size: 1.1rem; color: var(--text-dim); text-align: center; }
+        #result-container { width: 100%; max-width: 550px; display: none; margin-top: 20px; }
+        #result { background: var(--surface); padding: 25px; border-radius: 20px; border-left: 5px solid var(--primary); line-height: 1.7; }
+
+        .footer { padding: 40px 0 60px; text-align: center; }
+        .donate-btn { display: inline-flex; align-items: center; gap: 8px; background: #2c2c2c; color: #ffdd00; text-decoration: none; padding: 10px 20px; border-radius: 25px; font-weight: 700; }
+        .version-tag { position: fixed; bottom: 5px; right: 10px; font-size: 0.65rem; color: var(--primary); opacity: 0.6; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <div class="app-layout">
+        <aside class="sidebar">
+            <!-- TIP PANEL OFICIAL DE KO-FI -->
+            <div class="kofi-tip-container">
+                <iframe id='kofiframe' src='https://ko-fi.com/victorgf87/?hidefeed=true&widget=true&embed=true&preview=true' style='border:none;width:100%;padding:0;background:transparent;' height='650' title='victorgf87'></iframe>
+            </div>
+            
+            <section style="background:var(--surface); padding:15px; border-radius:15px; border:1px solid rgba(255,255,255,0.05); text-align:center;">
+                <h3 style="font-size: 0.75rem; margin: 0; color: var(--primary); letter-spacing: 1px;">MECENAS 🏆</h3>
+                <p style="font-size: 0.8rem; margin: 10px 0 0;">Víctor (victorgf87)</p>
+            </section>
+        </aside>
+
+        <div class="main-container">
+            <header class="header">
+                <h1><span>🀄</span> Mahjong Scorer</h1>
+                <nav class="main-nav"><a href="/reglas">Reglas</a><a href="/jugadas">Jugadas</a></nav>
+            </header>
+            
+            <div class="mode-switch" style="background:var(--surface); padding:5px; border-radius:15px; display:flex; gap:5px; margin-bottom:20px;">
+                <button id="modeMCR" class="mode-btn" style="padding:8px 20px; border-radius:10px; border:none; background:var(--primary); color:var(--bg); font-weight:700; cursor:pointer;" onclick="setMode('MCR')">MCR</button>
+                <button id="modeRiichi" class="mode-btn" style="padding:8px 20px; border-radius:10px; border:none; background:transparent; color:var(--text-dim); font-weight:700; cursor:pointer;" onclick="setMode('Riichi')">Riichi</button>
+            </div>
+
+            <main class="main-content" style="display:flex; flex-direction:column; align-items:center; width:100%;">
+                <div class="record-section">
+                    <button id="recordBtn" class="record-btn">
+                        <svg viewBox="0 0 24 24" style="width:70px; height:70px; fill:#333;"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                    </button>
+                    <div id="status">Pulsa para hablar</div>
+                </div>
+                <div id="result-container"><div id="result"></div></div>
+            </main>
+        </div>
+        <div style="width:320px; display:none;" class="sidebar-spacer"></div>
+    </div>
+
+    <footer class="footer">
+        <p style="font-size:0.8rem; color:var(--text-dim); margin-bottom:10px;">¿Te ha servido? Apoya el proyecto</p>
+        <a href="https://ko-fi.com/victorgf87" target="_blank" class="donate-btn"><span>☕</span> Invitar a un café</a>
+    </footer>
+    <div class="version-tag">v4.7-tip-panel</div>
+
+    <script>
+        const recordBtn = document.getElementById('recordBtn'), status = document.getElementById('status'), resultContainer = document.getElementById('result-container'), resultDiv = document.getElementById('result'), modeMCR = document.getElementById('modeMCR'), modeRiichi = document.getElementById('modeRiichi');
+        let currentMode = 'MCR', mediaRecorder, audioChunks = [];
+
+        function setMode(m) { 
+            currentMode = m;
+            modeMCR.style.background = m === 'MCR' ? 'var(--primary)' : 'transparent';
+            modeMCR.style.color = m === 'MCR' ? 'var(--bg)' : 'var(--text-dim)';
+            modeRiichi.style.background = m === 'Riichi' ? 'var(--primary)' : 'transparent';
+            modeRiichi.style.color = m === 'Riichi' ? 'var(--bg)' : 'var(--text-dim)';
+        }
+
+        recordBtn.onclick = async () => {
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                mediaRecorder.stop(); recordBtn.classList.remove('recording'); recordBtn.classList.add('processing');
+                status.innerText = `Analizando...`;
+                return;
+            }
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream); audioChunks = [];
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = async () => {
+                    const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const reader = new FileReader(); reader.readAsDataURL(blob);
+                    reader.onloadend = async () => {
+                        const base64 = reader.result.split(',')[1];
+                        try {
+                            const res = await fetch('/api/score', { 
+                                method: 'POST', body: JSON.stringify({ audio: base64, mode: currentMode }),
+                                headers: { 'Content-Type': 'application/json' }
+                            });
+                            const data = await res.json();
+                            resultDiv.innerHTML = data.text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+                            resultContainer.style.display = 'block'; status.innerText = "¡Listo!"; recordBtn.classList.remove('processing');
+                        } catch (err) {
+                            status.innerText = "Error servidor"; recordBtn.classList.remove('processing');
+                        }
+                    };
+                };
+                mediaRecorder.start(); recordBtn.classList.add('recording'); status.innerText = "Escuchando...";
+            } catch(e) { status.innerText = "Error micro"; }
+        };
+    </script>
+</body>
+</html>

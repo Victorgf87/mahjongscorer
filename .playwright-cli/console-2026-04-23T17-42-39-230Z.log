@@ -1,0 +1,2 @@
+[     334ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ chrome-error://chromewebdata/:0
+[     337ms] [ERROR] Refused to display 'https://ko-fi.com/' in a frame because it set 'X-Frame-Options' to 'sameorigin'. @ chrome-error://chromewebdata/:0

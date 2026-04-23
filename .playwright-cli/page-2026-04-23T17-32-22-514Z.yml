@@ -1,0 +1,31 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - iframe [ref=e5]:
+        - generic [ref=f1e3]:
+          - text: La página
+          - strong [ref=f1e4]: ko-fi.com
+          - text: ha rechazado la conexión.
+      - paragraph [ref=e6]: Actualizado automáticamente desde Ko-fi.
+    - generic [ref=e7]:
+      - banner [ref=e8]:
+        - heading "🀄 Mahjong Scorer" [level=1] [ref=e9]
+        - navigation [ref=e10]:
+          - link "Reglas" [ref=e11] [cursor=pointer]:
+            - /url: /reglas
+          - link "Jugadas" [ref=e12] [cursor=pointer]:
+            - /url: /jugadas
+      - generic [ref=e13]:
+        - button "MCR" [ref=e14] [cursor=pointer]
+        - button "Riichi" [ref=e15] [cursor=pointer]
+      - main [ref=e16]:
+        - generic [ref=e17]:
+          - button [ref=e18] [cursor=pointer]:
+            - img [ref=e19]
+          - generic [ref=e22]: Pulsa para hablar
+  - contentinfo [ref=e23]:
+    - link "☕ Invitar a un café" [ref=e24] [cursor=pointer]:
+      - /url: https://ko-fi.com/victorgf87
+      - generic [ref=e25]: ☕
+      - text: Invitar a un café
+  - generic: v4.6-kofi-official

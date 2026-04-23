@@ -1,0 +1,15 @@
+{
+  "name": "Mahjong Scorer",
+  "short_name": "Mahjong",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "description": "Calculadora de puntos de Mahjong por voz",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3406/3406059.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

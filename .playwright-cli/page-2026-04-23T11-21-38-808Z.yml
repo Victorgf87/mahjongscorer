@@ -1,0 +1,28 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - generic [ref=e4]:
+        - heading "Mecenas 🏆" [level=3] [ref=e5]
+        - generic [ref=e7]: Víctor
+        - generic [ref=e8]: Tu apoyo mantiene este árbitro vivo y gratuito.
+    - generic [ref=e9]:
+      - banner [ref=e10]:
+        - heading "🀄 Mahjong Scorer" [level=1] [ref=e11]
+        - button "?" [ref=e12] [cursor=pointer]
+        - navigation [ref=e13]:
+          - link "Reglas" [ref=e14] [cursor=pointer]:
+            - /url: /reglas
+          - link "Jugadas" [ref=e15] [cursor=pointer]:
+            - /url: /jugadas
+      - main [ref=e16]:
+        - generic [ref=e17]:
+          - button [ref=e18] [cursor=pointer]:
+            - img [ref=e19]
+          - generic [ref=e22]: Pulsa para hablar
+  - contentinfo [ref=e24]:
+    - generic [ref=e25]:
+      - link "☕ Invitar a un café" [ref=e26] [cursor=pointer]:
+        - /url: https://ko-fi.com/TU_USUARIO
+        - generic [ref=e27]: ☕
+        - text: Invitar a un café
+      - button "o visualizando un vídeo 📺" [ref=e28] [cursor=pointer]
