@@ -1,1 +1,1 @@
-v4.11.0-fast-smart
+v4.11.2-full-view
