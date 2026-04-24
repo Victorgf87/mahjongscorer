@@ -45,14 +45,20 @@ INSTRUCCIONES:
 3. Calcula el total siguiendo estrictamente las fórmulas proporcionadas.
 
 FORMATO DE RESPUESTA OBLIGATORIO:
-ENTRADA: [Escribe aquí exactamente lo que has entendido de la jugada]
+ENTRADA: [Transcripción de la jugada]
 ---
+ELEMENTOS:
 - [Elemento]: [Valor]
 - [Elemento]: [Valor]
---- TOTAL: [Suma total]
--- TSUMO: [Cálculo] = [Resultado Final]
--- RON: [Cálculo] = [Resultado Final]
+...
+SUMA BASE: [Suma de los puntos de la tabla]
 
+CÁLCULO FINAL:
+-- SI ES TSUMO: ([Suma Base] + 8) * 3 = [Puntos Totales]
+-- SI ES RON: [Suma Base] + 24 = [Puntos Totales]
+
+PUNTUACIÓN FINAL: [Elige el valor mayor de los dos anteriores o el que pida el usuario]
+---
 Breve explicación técnica.
 `;
 
