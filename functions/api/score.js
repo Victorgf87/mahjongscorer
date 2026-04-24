@@ -1,7 +1,7 @@
 /**
  * API Endpoint: /api/score
  * Universal Arbiter for Mahjong
- * v4.13.8-universal-api
+ * v4.14.3-final-fix
  */
 
 const RULES_MD = `
@@ -55,20 +55,19 @@ export async function onRequestPost(context) {
   try {
     const { audio, text, mode } = await request.json();
     const modePrompt = mode === 'Riichi' ? "SISTEMA SELECCIONADO: RIICHI." : "SISTEMA SELECCIONADO: MCR.";
-    const fullInstruction = `${SYSTEM_CONTEXT}\n\n${modePrompt}`;
     
     let resultText = "";
     const inputType = audio ? "audio" : "text";
 
+    const systemInstruction = { parts: [{ text: `${SYSTEM_CONTEXT}\n\n${modePrompt}` }] };
+
     if (audio) {
-      resultText = await callGemini(env.GEMINI_KEY, [
-        { text: fullInstruction },
+      resultText = await callGemini(env.GEMINI_KEY, systemInstruction, [
         { inline_data: { mime_type: "audio/webm", data: audio } },
         { text: "Arbitra esta mano." }
       ]);
     } else {
-      resultText = await callGemini(env.GEMINI_KEY, [
-        { text: fullInstruction },
+      resultText = await callGemini(env.GEMINI_KEY, systemInstruction, [
         { text: `Arbitra esta jugada: "${text}"` }
       ]);
     }
@@ -77,19 +76,20 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ score: resultText }), { headers: { "Content-Type": "application/json" } });
 
   } catch (err) {
-    const keyHint = env.GEMINI_KEY ? `${env.GEMINI_KEY.substring(0, 4)}...` : "MISSING";
-    waitUntil(logToLoki(env, { level: "error", message: `Key: ${keyHint}, Error: ${err.message}` }));
-    return new Response(JSON.stringify({ error: `${err.message} (Key: ${keyHint})` }), { status: 500 });
+    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
 }
 
-async function callGemini(apiKey, userParts) {
-  const model = "gemini-pro"; 
-  const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`;
+async function callGemini(apiKey, systemInstruction, userParts) {
+  const model = "gemini-1.5-flash"; 
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ contents: [{ role: "user", parts: userParts }] })
+    body: JSON.stringify({
+      system_instruction: systemInstruction,
+      contents: [{ role: "user", parts: userParts }]
+    })
   });
   const data = await res.json();
   if (data.error) throw new Error(data.error.message);
