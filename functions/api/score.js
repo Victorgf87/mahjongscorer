@@ -10,7 +10,7 @@ export async function onRequestPost(context) {
   const { request, env, waitUntil } = context;
   try {
     const { audio, text, mode } = await request.json();
-    const model = "gemini-pro"; 
+    const model = "gemini-1.5-flash-latest"; 
     const apiKey = env.GEMINI_KEY;
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
