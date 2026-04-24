@@ -1,7 +1,7 @@
 /**
  * API Endpoint: /api/score
- * Strict Arbiter for Mahjong
- * v4.16.2-strict-rules
+ * Arbiter for Mahjong hands (Both Scores Fix)
+ * v4.16.4-both-scores
  */
 
 const RULES_MD = `
@@ -27,25 +27,29 @@ const RULES_MD = `
 `;
 
 const STRICT_PROMPT = `
-Eres un procesador de datos de Mahjong. PROHIBIDO SALUDAR. PROHIBIDO USAR EXCLAMACIONES.
+Eres un procesador de datos de Mahjong. PROHIBIDO SALUDAR. 
 Cíñete ESTRICTAMENTE a la tabla de reglas proporcionada:
 ${RULES_MD}
 
 INSTRUCCIONES:
-1. Transcribe la ENTRADA de forma literal, sin añadir preámbulos.
-2. Identifica ELEMENTOS.
-3. Calcula SUMA BASE.
-4. Calcula PUNTUACIÓN FINAL según Tsumo/Ron.
+1. Transcribe la ENTRADA literal.
+2. Identifica ELEMENTOS y calcula SUMA BASE.
+3. Calcula SIEMPRE tanto TSUMO como RON, sin preguntar al usuario.
 
 FORMATO OBLIGATORIO:
-ENTRADA: [Texto literal detectado]
+ENTRADA: [Texto literal]
 ---
 ELEMENTOS:
 - [Nombre]: [Puntos]
 SUMA BASE: [X]
-PUNTUACIÓN FINAL: [Cálculo matemático según Tsumo/Ron]
+
+CÁLCULOS:
+-- TSUMO: ([Suma Base] + 8) * 3 = [Puntos Totales]
+-- RON: [Suma Base] + 24 = [Puntos Totales]
+
+PUNTUACIÓN FINAL: [El valor correspondiente si se especificó, o repetir ambos si no]
 ---
-Explicación breve de 1 frase.
+Breve explicación técnica.
 `;
 
 export async function onRequestPost(context) {
@@ -71,13 +75,13 @@ export async function onRequestPost(context) {
     const data = await res.json();
     if (data.error) throw new Error(data.error.message);
     const resultText = data.candidates[0].content.parts[0].text;
+    const duration = ((Date.now() - start) / 1000).toFixed(2);
 
-    waitUntil(logToLoki(env, { level: "info", mode, duration: Date.now() - start }));
+    waitUntil(logToLoki(env, { level: "info", mode, duration }));
     
-    return new Response(JSON.stringify({ 
-        score: resultText,
-        duration: ((Date.now() - start) / 1000).toFixed(2)
-    }), { headers: { "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ score: resultText, duration }), {
+      headers: { "Content-Type": "application/json" }
+    });
 
   } catch (err) {
     return new Response(JSON.stringify({ error: err.message }), { status: 500 });
