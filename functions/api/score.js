@@ -77,8 +77,9 @@ export async function onRequestPost(context) {
     return new Response(JSON.stringify({ score: resultText }), { headers: { "Content-Type": "application/json" } });
 
   } catch (err) {
-    waitUntil(logToLoki(env, { level: "error", message: err.message }));
-    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+    const keyHint = env.GEMINI_KEY ? `${env.GEMINI_KEY.substring(0, 4)}...` : "MISSING";
+    waitUntil(logToLoki(env, { level: "error", message: `Key: ${keyHint}, Error: ${err.message}` }));
+    return new Response(JSON.stringify({ error: `${err.message} (Key: ${keyHint})` }), { status: 500 });
   }
 }
 
