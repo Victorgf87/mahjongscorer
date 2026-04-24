@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mahjong Scorer v4.13.2 PRO</title>
+    <title>Mahjong Scorer v4.13.5 PRO</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3406/3406059.png">
     <meta name="theme-color" content="#121212">
@@ -24,7 +24,7 @@
             background-color: var(--bg); color: var(--text); margin: 0; padding: 20px;
             display: flex; flex-direction: column; align-items: center; min-height: 100vh;
         }
-        .container { width: 100%; max-width: 500px; }
+        .container { width: 100%; max-width: 500px; display: flex; flex-direction: column; min-height: calc(100vh - 40px); }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; width: 100%; }
         .header h1 { margin: 0; font-size: 1.5rem; display: flex; align-items: center; gap: 10px; color: var(--primary); font-weight: 800; }
         .header h1 span { font-size: 1.8rem; }
@@ -119,12 +119,12 @@
         </footer>
     </div>
 
-    <div class="version-tag">v4.13.2-centered-stable</div>
+    <div class="version-tag">v4.13.5-clean-deploy</div>
 
     <script>
         const recordBtn = document.getElementById('recordBtn'), status = document.getElementById('status'), resultContainer = document.getElementById('result-container'), resultDiv = document.getElementById('result'), modeMCR = document.getElementById('modeMCR'), modeRiichi = document.getElementById('modeRiichi'), manualInput = document.getElementById('manualPlay'), inputEcho = document.getElementById('input-echo');
         let currentMode = 'MCR', mediaRecorder, audioChunks = [];
-        let lastInput = ""; 
+        let lastInput = "";
 
         function setMode(m) {
             currentMode = m;
@@ -165,7 +165,6 @@
             inputEcho.innerText = `Has dicho: "${detected}"`;
             inputEcho.style.display = 'block';
             resultDiv.innerText = analysis || "No se pudo interpretar la jugada.";
-
             status.innerText = "¡Listo!";
             manualInput.value = "";
         }
