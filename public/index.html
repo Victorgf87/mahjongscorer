@@ -124,6 +124,7 @@
     <script>
         const recordBtn = document.getElementById('recordBtn'), status = document.getElementById('status'), resultContainer = document.getElementById('result-container'), resultDiv = document.getElementById('result'), modeMCR = document.getElementById('modeMCR'), modeRiichi = document.getElementById('modeRiichi'), manualInput = document.getElementById('manualPlay'), inputEcho = document.getElementById('input-echo');
         let currentMode = 'MCR', mediaRecorder, audioChunks = [];
+        let lastInput = ""; 
 
         function setMode(m) {
             currentMode = m;
@@ -136,6 +137,7 @@
         async function submitManualPlay() {
             const playText = manualInput.value.trim();
             if (!playText) return;
+            lastInput = playText;
             status.innerText = "Analizando texto...";
             resultContainer.style.display = 'none';
             try {
@@ -151,16 +153,19 @@
 
         function showResult(score) {
             resultContainer.style.display = 'block';
+            let detected = lastInput;
+            let analysis = score;
+
             if (score && score.includes('ENTRADA:')) {
                 const parts = score.split('---');
-                const detected = parts[0].replace('ENTRADA:', '').trim();
-                inputEcho.innerText = `Has dicho: "${detected}"`;
-                inputEcho.style.display = 'block';
-                resultDiv.innerText = parts.length > 1 ? parts.slice(1).join('---').trim() : parts[0].trim();
-            } else {
-                inputEcho.style.display = 'none';
-                resultDiv.innerText = score || "No se pudo interpretar la jugada.";
+                detected = parts[0].replace('ENTRADA:', '').trim();
+                analysis = parts.length > 1 ? parts.slice(1).join('---').trim() : parts[0].trim();
             }
+
+            inputEcho.innerText = `Has dicho: "${detected}"`;
+            inputEcho.style.display = 'block';
+            resultDiv.innerText = analysis || "No se pudo interpretar la jugada.";
+
             status.innerText = "¡Listo!";
             manualInput.value = "";
         }
