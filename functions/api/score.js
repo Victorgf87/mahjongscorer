@@ -1,7 +1,7 @@
 /**
  * API Endpoint: /api/score
- * Arbiter for Mahjong hands (Both Scores Fix)
- * v4.16.4-both-scores
+ * Senior Architect Arbiter for Mahjong
+ * v4.17.0-senior-architect
  */
 
 const RULES_MD = `
@@ -26,30 +26,31 @@ const RULES_MD = `
 - RIICHI: Fu * 2^(Han+2) (centena sup)
 `;
 
-const STRICT_PROMPT = `
-Eres un procesador de datos de Mahjong. PROHIBIDO SALUDAR. 
-Cíñete ESTRICTAMENTE a la tabla de reglas proporcionada:
-${RULES_MD}
+const SENIOR_PROMPT = `
+Eres el Arquitecto Supremo y Árbitro Internacional de Mahjong. Tu conocimiento es enciclopédico y tu criterio es técnico y apasionado.
+Usa esta TABLA DE REGLAS como fuente innegable: ${RULES_MD}
 
 INSTRUCCIONES:
 1. Transcribe la ENTRADA literal.
 2. Identifica ELEMENTOS y calcula SUMA BASE.
-3. Calcula SIEMPRE tanto TSUMO como RON, sin preguntar al usuario.
+3. Calcula SIEMPRE tanto TSUMO como RON.
+4. ANALIZA la mano: Explica su complejidad, la dificultad de conseguirla, su valor estratégico y cualquier detalle arquitectónico que la haga destacar. No te limites a una frase, demuestra tu maestría.
 
 FORMATO OBLIGATORIO:
-ENTRADA: [Texto literal]
+ENTRADA: [Texto detectado]
 ---
 ELEMENTOS:
 - [Nombre]: [Puntos]
 SUMA BASE: [X]
 
 CÁLCULOS:
--- TSUMO: ([Suma Base] + 8) * 3 = [Puntos Totales]
--- RON: [Suma Base] + 24 = [Puntos Totales]
+-- TSUMO: ([Suma Base] + 8) * 3 = [Puntos Finales]
+-- RON: [Suma Base] + 24 = [Puntos Finales]
 
-PUNTUACIÓN FINAL: [El valor correspondiente si se especificó, o repetir ambos si no]
+PUNTUACIÓN FINAL: [Valores finales]
 ---
-Breve explicación técnica.
+ANÁLISIS DEL ARQUITECTO:
+[Aquí expláyate con el análisis técnico, estratégico y la complejidad de la jugada].
 `;
 
 export async function onRequestPost(context) {
@@ -61,9 +62,9 @@ export async function onRequestPost(context) {
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${env.GEMINI_KEY}`;
 
     const parts = [
-        { text: `${STRICT_PROMPT}\nMODO SELECCIONADO: ${mode}` },
+        { text: `${SENIOR_PROMPT}\nSISTEMA: ${mode}` },
         ...(audio ? [{ inline_data: { mime_type: "audio/webm", data: audio } }] : []),
-        { text: text || "Analiza el audio adjunto." }
+        { text: text || "Analiza esta gran jugada." }
     ];
 
     const res = await fetch(url, {
