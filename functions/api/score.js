@@ -102,7 +102,7 @@ export async function onRequestPost(context) {
 }
 
 async function callGemini(apiKey, systemInstruction, userParts) {
-  const model = "gemini-1.5-flash"; 
+  const model = "gemini-1.5-pro"; 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
   const res = await fetch(url, {
     method: "POST",
