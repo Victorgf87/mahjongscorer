@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mahjong Scorer v4.11.4 PRO</title>
+    <title>Mahjong Scorer v4.12.0 PRO</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3406/3406059.png">
     <meta name="theme-color" content="#121212">
@@ -20,40 +20,58 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg); color: var(--text); margin: 0; padding: 0;
-            display: flex; height: 100vh; overflow: hidden;
+            display: flex; height: 100vh; width: 100vw; overflow: hidden;
         }
         .sidebar {
-            width: 320px; background: var(--surface); border-right: 1px solid var(--border);
+            width: 320px; min-width: 320px; background: var(--surface); border-right: 1px solid var(--border);
             display: flex; flex-direction: column; padding: 25px; box-sizing: border-box;
+            transition: all 0.3s ease;
         }
-        .main-container { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 30px; }
+        .main-container { flex: 1; display: flex; flex-direction: column; overflow-y: auto; padding: 30px; box-sizing: border-box; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
         .main-nav { display: flex; gap: 20px; }
         .main-nav a { color: var(--text-dim); text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: color 0.2s; }
         .main-nav a:hover { color: var(--primary); }
-        .card { background: var(--surface); border-radius: 24px; padding: 40px; text-align: center; border: 1px solid var(--border); }
+        .card { background: var(--surface); border-radius: 24px; padding: 40px; text-align: center; border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.4); max-width: 600px; margin: 0 auto; width: 100%; box-sizing: border-box; }
         .record-btn {
-            width: 100px; height: 100px; border-radius: 50%; background: var(--primary);
+            width: 90px; height: 90px; border-radius: 50%; background: var(--primary);
             border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 25px; transition: transform 0.2s, box-shadow 0.2s;
+            margin: 0 auto 20px; transition: transform 0.2s, box-shadow 0.2s;
         }
-        .record-btn:active { transform: scale(0.9); }
+        .record-btn:active { transform: scale(0.95); }
         .record-btn.recording { animation: pulse 1.5s infinite; background: #ff5252; }
         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.4); } 70% { box-shadow: 0 0 0 20px rgba(255, 82, 82, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 82, 82, 0); } }
-        .status { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 20px; font-weight: 500; }
-        .result-container { margin-top: 30px; text-align: left; background: rgba(0,0,0,0.2); padding: 25px; border-radius: 20px; border: 1px solid var(--border); display: none; }
+        .status { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 25px; font-weight: 500; height: 1.2rem; }
+        
+        .manual-input-container { margin-top: 30px; border-top: 1px solid var(--border); padding-top: 25px; }
+        .manual-input-group { display: flex; gap: 10px; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 16px; border: 1px solid var(--border); }
+        .manual-input { flex: 1; background: transparent; border: none; color: var(--text); padding: 10px 15px; font-size: 1rem; outline: none; }
+        .send-btn { background: var(--primary); color: var(--bg); border: none; width: 44px; height: 44px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: opacity 0.2s; }
+        .send-btn:hover { opacity: 0.9; }
+
+        .result-container { margin-top: 30px; text-align: left; background: rgba(0,0,0,0.4); padding: 25px; border-radius: 20px; border: 1px solid var(--primary); border-opacity: 0.3; display: none; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
         .footer { margin-top: auto; padding-top: 40px; text-align: center; }
         .donate-btn { background: #292929; color: #ff5e5b; text-decoration: none; padding: 12px 20px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; border: 1px solid rgba(255,94,91,0.2); }
         .version-tag { position: fixed; bottom: 10px; right: 15px; font-size: 0.7rem; color: var(--primary); opacity: 0.5; font-weight: bold; }
+        
         h1 { margin: 0; font-size: 1.4rem; display: flex; align-items: center; gap: 10px; }
         h1 span { font-size: 1.8rem; }
         .mode-selector { display: flex; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 12px; margin-bottom: 25px; }
         .mode-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.8rem; transition: all 0.2s; }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; overflow-y: auto; height: auto; }
+            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border); height: auto; }
+            .main-container { height: auto; overflow: visible; padding: 20px; }
+            .card { padding: 30px 20px; }
+        }
     </style>
 </head>
 <body>
         <aside class="sidebar">
-            <div style="margin-bottom: 40px;">
+            <div style="margin-bottom: 30px;">
                 <h1 style="color:var(--primary);"><span>🀄</span> M-Arbitre</h1>
                 <p style="color:var(--text-dim); font-size:0.8rem; margin-top:5px;">Tu árbitro personal de Mahjong</p>
             </div>
@@ -63,38 +81,52 @@
                 <button id="modeRiichi" class="mode-btn" style="background:transparent; color:var(--text-dim);" onclick="setMode('Riichi')">Riichi</button>
             </div>
 
-            <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:15px; border:1px solid var(--border);">
-                <p style="font-size:0.75rem; color:var(--text-dim); line-height:1.4;">Di la jugada, por ejemplo:<br><em>"Tsumo, Big Three Dragons, All Simples"</em></p>
+            <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:15px; border:1px solid var(--border); margin-bottom: 20px;">
+                <p style="font-size:0.75rem; color:var(--text-dim); line-height:1.4;">Di o escribe la jugada, ej:<br><em>"Tsumo, Big Three Dragons, All Simples"</em></p>
+            </div>
+            
+            <div class="footer">
+                <p style="font-size:0.7rem; color:var(--text-dim); margin-bottom:12px;">Apoya el proyecto</p>
+                <a href="https://ko-fi.com/victorgf87" target="_blank" class="donate-btn"><span>☕</span> Ko-fi</a>
             </div>
         </aside>
 
         <div class="main-container">
             <header class="header">
                 <h1><span>🀄</span> Mahjong Scorer</h1>
-                <nav class="main-nav"><a href="reglas.html">Reglas</a><a href="jugadas.html">Jugadas</a><a href="pairings.html">Emparejamientos</a></nav>
+                <nav class="main-nav">
+                    <a href="reglas.html">Reglas</a>
+                    <a href="jugadas.html">Jugadas</a>
+                    <a href="pairings.html">Torneo</a>
+                </nav>
             </header>
 
             <div class="card">
                 <button id="recordBtn" class="record-btn">
                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:white;"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
                 </button>
-                <div id="status" class="status">Pulsa para arbitrar jugada</div>
+                <div id="status" class="status">Pulsa para arbitrar por voz</div>
                 
+                <div class="manual-input-container">
+                    <div class="manual-input-group">
+                        <input type="text" id="manualPlay" class="manual-input" placeholder="Escribe la jugada aquí..." onkeypress="handleEnter(event)">
+                        <button class="send-btn" onclick="submitManualPlay()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--bg);"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                        </button>
+                    </div>
+                </div>
+
                 <div id="result-container" class="result-container">
                     <div style="font-size:0.7rem; color:var(--primary); text-transform:uppercase; font-weight:800; margin-bottom:10px; letter-spacing:1px;">Resultado del Arbitraje</div>
-                    <div id="result" style="font-size:1.1rem; line-height:1.5; font-weight:500;"></div>
+                    <div id="result" style="font-size:1.1rem; line-height:1.5; font-weight:600; color:white;"></div>
                 </div>
             </div>
 
-            <footer class="footer">
-                <p style="font-size:0.8rem; color:var(--text-dim); margin-bottom:10px;">¿Te ha servido? Apoya el proyecto</p>
-                <a href="https://ko-fi.com/victorgf87" target="_blank" class="donate-btn"><span>☕</span> Invitar a un café</a>
-            </footer>
-            <div class="version-tag">v4.11.4-api</div>
+            <div class="version-tag">v4.12.0-manual-input</div>
         </div>
 
     <script>
-        const recordBtn = document.getElementById('recordBtn'), status = document.getElementById('status'), resultContainer = document.getElementById('result-container'), resultDiv = document.getElementById('result'), modeMCR = document.getElementById('modeMCR'), modeRiichi = document.getElementById('modeRiichi');
+        const recordBtn = document.getElementById('recordBtn'), status = document.getElementById('status'), resultContainer = document.getElementById('result-container'), resultDiv = document.getElementById('result'), modeMCR = document.getElementById('modeMCR'), modeRiichi = document.getElementById('modeRiichi'), manualInput = document.getElementById('manualPlay');
         let currentMode = 'MCR', mediaRecorder, audioChunks = [];
 
         function setMode(m) {
@@ -105,9 +137,38 @@
             modeRiichi.style.color = m === 'Riichi' ? 'var(--bg)' : 'var(--text-dim)';
         }
 
+        function handleEnter(e) { if(e.key === 'Enter') submitManualPlay(); }
+
+        async function submitManualPlay() {
+            const playText = manualInput.value.trim();
+            if (!playText) return;
+            
+            status.innerText = "Analizando texto...";
+            resultContainer.style.display = 'none';
+
+            try {
+                const res = await fetch('/api/score', {
+                    method: 'POST',
+                    body: JSON.stringify({ text: playText, mode: currentMode }),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await res.json();
+                showResult(data.score);
+            } catch(e) {
+                status.innerText = "Error de conexión";
+            }
+        }
+
+        function showResult(score) {
+            resultContainer.style.display = 'block';
+            resultDiv.innerText = score || "No se pudo interpretar la jugada.";
+            status.innerText = "¡Listo!";
+            manualInput.value = "";
+        }
+
         recordBtn.onclick = async () => {
             if (mediaRecorder && mediaRecorder.state === "recording") {
-                mediaRecorder.stop(); recordBtn.classList.remove('recording'); status.innerText = "Analizando jugada..."; return;
+                mediaRecorder.stop(); recordBtn.classList.remove('recording'); status.innerText = "Analizando audio..."; return;
             }
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -122,8 +183,8 @@
                                 method: 'POST', body: JSON.stringify({ audio: reader.result.split(',')[1], mode: currentMode }), headers: { 'Content-Type': 'application/json' }
                             });
                             const data = await res.json();
-                            resultContainer.style.display = 'block'; resultDiv.innerText = data.score || "No se detectó jugada clara."; status.innerText = "¡Listo!";
-                        } catch(e) { status.innerText = "Error de conexión"; }
+                            showResult(data.score);
+                        } catch(e) { status.innerText = "Error de audio"; }
                     };
                 };
                 mediaRecorder.start(); recordBtn.classList.add('recording'); status.innerText = "Escuchando...";
