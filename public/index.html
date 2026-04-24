@@ -145,9 +145,12 @@
             resultContainer.style.display = 'block';
             if (score && score.includes('ENTRADA:')) {
                 const parts = score.split('---');
-                inputEcho.innerText = `Has dicho: "${parts[0].replace('ENTRADA:', '').trim()}"`;
+                const detectedInput = parts[0].replace('ENTRADA:', '').trim();
+                const analysis = parts.length > 1 ? parts.slice(1).join('---').trim() : parts[0].trim();
+                
+                inputEcho.innerText = `Has dicho: "${detectedInput}"`;
                 inputEcho.style.display = 'block';
-                resultDiv.innerText = parts.slice(1).join('---').trim();
+                resultDiv.innerText = analysis;
             } else {
                 inputEcho.style.display = 'none';
                 resultDiv.innerText = score || "No se pudo interpretar.";

@@ -1,7 +1,7 @@
 /**
  * API Endpoint: /api/score
  * Arbiter for Mahjong hands (Voice or Text)
- * v4.12.1-smart-api
+ * v4.12.4-with-logging
  */
 
 const RULES_MD = `
@@ -40,10 +40,9 @@ Usa esta TABLA DE REGLAS como única fuente de verdad:
 ${RULES_MD}
 
 INSTRUCCIONES:
-1. Analiza la jugada proporcionada (puede ser por audio o texto).
+1. Analiza la jugada proporcionada (audio o texto).
 2. Identifica los elementos de la jugada que aparecen en la tabla.
 3. Calcula el total siguiendo estrictamente las fórmulas proporcionadas.
-4. Si la entrada es ambigua o incoherente, intenta interpretarla con sentido común de Mahjong, pero prioriza la tabla.
 
 FORMATO DE RESPUESTA OBLIGATORIO:
 ENTRADA: [Escribe aquí exactamente lo que has entendido de la jugada]
@@ -59,35 +58,39 @@ Breve explicación técnica.
 
 export async function onRequestPost(context) {
   const { request, env, waitUntil } = context;
+  const start = Date.now();
 
   try {
     const { audio, text, mode } = await request.json();
-    
     const modePrompt = mode === 'Riichi' ? "SISTEMA SELECCIONADO: RIICHI." : "SISTEMA SELECCIONADO: MCR.";
     const systemInstruction = `${BASE_PROMPT}\n\n${modePrompt}`;
     
     let resultText = "";
+    const inputType = audio ? "audio" : "text";
 
     if (audio) {
-      // Proceso de audio como antes
       resultText = await callGemini(env.GEMINI_KEY, systemInstruction, [
         { inline_data: { mime_type: "audio/webm", data: audio } },
         { text: "Arbitra esta mano de Mahjong." }
       ]);
-    } else if (text) {
-      // Proceso de texto manual
-      resultText = await callGemini(env.GEMINI_KEY, systemInstruction, [
-        { text: `Arbitra esta jugada de texto: "${text}"` }
-      ]);
     } else {
-      throw new Error("No input provided (audio or text)");
+      resultText = await callGemini(env.GEMINI_KEY, systemInstruction, [{ text: `Arbitra esta jugada: "${text}"` }]);
     }
+
+    // Registro en Grafana Loki (Background)
+    waitUntil(logToLoki(env, {
+      level: "info",
+      message: `Scoring request processed (${inputType})`,
+      inputType,
+      mode,
+      duration: Date.now() - start,
+      output: resultText.substring(0, 200)
+    }));
     
-    return new Response(JSON.stringify({ score: resultText }), {
-      headers: { "Content-Type": "application/json" }
-    });
+    return new Response(JSON.stringify({ score: resultText }), { headers: { "Content-Type": "application/json" } });
 
   } catch (err) {
+    waitUntil(logToLoki(env, { level: "error", message: err.message, stack: err.stack }));
     return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
 }
@@ -95,7 +98,6 @@ export async function onRequestPost(context) {
 async function callGemini(apiKey, systemInstruction, userParts) {
   const model = "gemini-1.5-flash-latest"; 
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-  
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -104,9 +106,28 @@ async function callGemini(apiKey, systemInstruction, userParts) {
       contents: [{ role: "user", parts: userParts }]
     })
   });
-
   const data = await res.json();
   if (data.error) throw new Error(data.error.message);
-  
   return data.candidates?.[0]?.content?.parts?.[0]?.text || "Sin respuesta.";
+}
+
+async function logToLoki(env, payload) {
+  if (!env.GRAFANA_URL || !env.GRAFANA_USER || !env.GRAFANA_TOKEN) return;
+  
+  const line = JSON.stringify({ app: "mahjong-scorer", ...payload });
+  const logData = {
+    streams: [{
+      stream: { app: "mahjong-scorer", env: "production" },
+      values: [[(Date.now() * 1000000).toString(), line]]
+    }]
+  };
+
+  await fetch(env.GRAFANA_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Basic ${btoa(`${env.GRAFANA_USER}:${env.GRAFANA_TOKEN}`)}`
+    },
+    body: JSON.stringify(logData)
+  }).catch(e => console.error("Loki error:", e));
 }
