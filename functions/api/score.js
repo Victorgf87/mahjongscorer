@@ -1,7 +1,7 @@
 /**
  * API Endpoint: /api/score
- * Arbiter for Mahjong hands (Voice or Text)
- * v4.12.4-with-logging
+ * Universal Arbiter for Mahjong
+ * v4.13.8-universal-api
  */
 
 const RULES_MD = `
@@ -33,34 +33,20 @@ const RULES_MD = `
 - Riichi: Puntos = Fu * 2^(Han+2). Redondeo a la centena superior.
 `;
 
-const BASE_PROMPT = `
-Eres el Árbitro Supremo de Mahjong. Tu precisión es absoluta. 
-Usa esta TABLA DE REGLAS como única fuente de verdad:
-
-${RULES_MD}
-
-INSTRUCCIONES:
-1. Analiza la jugada proporcionada (audio o texto).
-2. Identifica los elementos de la jugada que aparecen en la tabla.
-3. Calcula el total siguiendo estrictamente las fórmulas proporcionadas.
-
-FORMATO DE RESPUESTA OBLIGATORIO:
-ENTRADA: [Transcripción de la jugada]
+const SYSTEM_CONTEXT = `Eres el Árbitro Supremo de Mahjong. Usa esta TABLA DE REGLAS: ${RULES_MD}
+INSTRUCCIONES: Analiza la jugada, identifica elementos, calcula el total.
+FORMATO OBLIGATORIO:
+ENTRADA: [Transcripción]
 ---
 ELEMENTOS:
 - [Elemento]: [Valor]
-- [Elemento]: [Valor]
-...
-SUMA BASE: [Suma de los puntos de la tabla]
-
+SUMA BASE: [Suma]
 CÁLCULO FINAL:
--- SI ES TSUMO: ([Suma Base] + 8) * 3 = [Puntos Totales]
--- SI ES RON: [Suma Base] + 24 = [Puntos Totales]
-
-PUNTUACIÓN FINAL: [Elige el valor mayor de los dos anteriores o el que pida el usuario]
+-- SI ES TSUMO: ([Suma Base] + 8) * 3 = [Puntos]
+-- SI ES RON: [Suma Base] + 24 = [Puntos]
+PUNTUACIÓN FINAL: [Valor Real]
 ---
-Breve explicación técnica.
-`;
+Breve explicación técnica.`;
 
 export async function onRequestPost(context) {
   const { request, env, waitUntil } = context;
@@ -69,48 +55,40 @@ export async function onRequestPost(context) {
   try {
     const { audio, text, mode } = await request.json();
     const modePrompt = mode === 'Riichi' ? "SISTEMA SELECCIONADO: RIICHI." : "SISTEMA SELECCIONADO: MCR.";
-    const systemInstruction = `${BASE_PROMPT}\n\n${modePrompt}`;
+    const fullInstruction = `${SYSTEM_CONTEXT}\n\n${modePrompt}`;
     
     let resultText = "";
     const inputType = audio ? "audio" : "text";
 
     if (audio) {
-      resultText = await callGemini(env.GEMINI_KEY, systemInstruction, [
+      resultText = await callGemini(env.GEMINI_KEY, [
+        { text: fullInstruction },
         { inline_data: { mime_type: "audio/webm", data: audio } },
-        { text: "Arbitra esta mano de Mahjong." }
+        { text: "Arbitra esta mano." }
       ]);
     } else {
-      resultText = await callGemini(env.GEMINI_KEY, systemInstruction, [{ text: `Arbitra esta jugada: "${text}"` }]);
+      resultText = await callGemini(env.GEMINI_KEY, [
+        { text: fullInstruction },
+        { text: `Arbitra esta jugada: "${text}"` }
+      ]);
     }
 
-    // Registro en Grafana Loki (Background)
-    waitUntil(logToLoki(env, {
-      level: "info",
-      message: `Scoring request processed (${inputType})`,
-      inputType,
-      mode,
-      duration: Date.now() - start,
-      output: resultText.substring(0, 200)
-    }));
-    
+    waitUntil(logToLoki(env, { level: "info", message: `Processed ${inputType}`, inputType, mode, duration: Date.now() - start }));
     return new Response(JSON.stringify({ score: resultText }), { headers: { "Content-Type": "application/json" } });
 
   } catch (err) {
-    waitUntil(logToLoki(env, { level: "error", message: err.message, stack: err.stack }));
+    waitUntil(logToLoki(env, { level: "error", message: err.message }));
     return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
 }
 
-async function callGemini(apiKey, systemInstruction, userParts) {
+async function callGemini(apiKey, userParts) {
   const model = "gemini-1.5-flash"; 
-  const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      system_instruction: { parts: [{ text: systemInstruction }] },
-      contents: [{ role: "user", parts: userParts }]
-    })
+    body: JSON.stringify({ contents: [{ role: "user", parts: userParts }] })
   });
   const data = await res.json();
   if (data.error) throw new Error(data.error.message);
@@ -119,21 +97,11 @@ async function callGemini(apiKey, systemInstruction, userParts) {
 
 async function logToLoki(env, payload) {
   if (!env.GRAFANA_URL || !env.GRAFANA_USER || !env.GRAFANA_TOKEN) return;
-  
   const line = JSON.stringify({ app: "mahjong-scorer", ...payload });
-  const logData = {
-    streams: [{
-      stream: { app: "mahjong-scorer", env: "production" },
-      values: [[(Date.now() * 1000000).toString(), line]]
-    }]
-  };
-
+  const logData = { streams: [{ stream: { app: "mahjong-scorer" }, values: [[(Date.now() * 1000000).toString(), line]] }] };
   await fetch(env.GRAFANA_URL, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Basic ${btoa(`${env.GRAFANA_USER}:${env.GRAFANA_TOKEN}`)}`
-    },
+    headers: { "Content-Type": "application/json", "Authorization": `Basic ${btoa(`${env.GRAFANA_USER}:${env.GRAFANA_TOKEN}`)}` },
     body: JSON.stringify(logData)
-  }).catch(e => console.error("Loki error:", e));
+  }).catch(() => {});
 }
