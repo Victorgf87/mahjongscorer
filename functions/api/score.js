@@ -1,7 +1,7 @@
 /**
  * API Endpoint: /api/score
  * Ultra-Robust Arbiter for Mahjong
- * v4.15.0-gemini-2.0
+ * v4.16.0-gemini-2.5
  */
 
 const RULES_MD = `
@@ -59,7 +59,7 @@ export async function onRequestPost(context) {
     else parts.push({ text: `Arbitra esta jugada: "${text}"` });
 
     // Intento 1: Gemini 1.5 Flash (El más rápido y moderno)
-    let response = await callGeminiAPI(env.GEMINI_KEY, "gemini-2.0-flash", parts);
+    let response = await callGeminiAPI(env.GEMINI_KEY, "gemini-2.5-flash", parts);
     
     // Si falla por "modelo no encontrado", intentamos con Gemini Pro (Universal)
     if (response.error && response.error.includes("not found")) {
