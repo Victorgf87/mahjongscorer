@@ -1,112 +1,86 @@
 /**
  * API Endpoint: /api/score
- * Arbiter for Mahjong hands (Voice or Text)
- * v4.16.1-perf-stats
+ * Strict Arbiter for Mahjong
+ * v4.16.2-strict-rules
  */
 
 const RULES_MD = `
-# DICCIONARIO OFICIAL DE ARBITRAJE MAHJONG
-## REGLAMENTO MCR (Chinese Official) - PUNTOS DIRECTOS
-- 88 PUNTOS: Big Four Winds, Big Three Dragons, All Green, Nine Gates, Four Kongs, Seven Shifted Pairs, Thirteen Orphans.
-- 64 PUNTOS: All Terminals, Little Four Winds, Little Three Dragons, All Honors, Four Pure Pungs, Orchid.
-- 48 PUNTOS: Quadruple Pure Chow, Four Pure Shifted Pungs.
-- 32 PUNTOS: Four Pure Shifted Chows, Three Kongs, All Terminals and Honors.
-- 24 PUNTOS: Seven Pairs, Greater Honors and Knitted Tiles, All Pungs, Pure Triple Chow, Mixed Shifted Pungs, Upper/Middle/Lower Tiles.
-- 16 PUNTOS: Pure Straight, Three-Suited Terminal Chows, Pure Shifted Pungs, All Five, Triple Knitted Chow.
-- 12 PUNTOS: Lesser Honors and Knitted Tiles, Knitted Straight, Upper/Lower Four, Big Three Winds.
-- 8 PUNTOS: Mixed Straight, Reversible Tiles, Mixed Triple Chow, Two Pure Terminal Chows, Mixed Shifted Chows, Chicken Hand.
-- 6 PUNTOS: All Pungs, All Half-Flush, Mixed Shifted Pungs, Two Dragons.
-- 4 PUNTOS: Fully Concealed, Last Tile, Out with Replacement, Robbing the Kong.
-- 2 PUNTOS: Dragon Pung, Prevalent Wind, Seat Wind, Concealed Hand, All Chows, Tile Hog, Double Pung, Two Mixed Terminal Chows.
-- 1 PUNTO: Pure Double Chow, Mixed Double Pung, Short Straight, Two Terminal Chows, Pung of Terminals or Honors, Melded Kong, One Voided Suit, No Terminals, Edge/Closed/Single Wait, Self-Drawn.
+# REGLAMENTO OFICIAL MAHJONG
+## MCR (Chinese Official)
+- 88: Big Four Winds, Big Three Dragons, All Green, Nine Gates, Four Kongs, Seven Pairs, 13 Orphans.
+- 64: All Terminals, Little Four Winds, Little Three Dragons, All Honors, Four Pure Pungs.
+- 48: Quadruple Pure Chow, Four Pure Shifted Pungs.
+- 32: Four Pure Shifted Chows, Three Kongs, Honroutou.
+- 24: Seven Pairs (Siete Pares), Greater Honors, Pure Triple Chow.
+- 16: Pure Straight (Escalera Pura), Three-Suited Terminal Chows, Pure Shifted Pungs.
+- 12: Lesser Honors, Knitted Straight, Big Three Winds.
+- 8: Mixed Straight, Reversible Tiles, Mixed Triple Chow.
+- 6: ALL PUNGS (Todo Pon / Peng Peng Hu), All Half-Flush, Two Dragons.
+- 4: Fully Concealed, Last Tile, Robbing Kong.
+- 2: Dragon Pung (Pon Dragón), Prevalent/Seat Wind, Concealed Hand, All Chows.
+- 1: Pure Double Chow, Mixed Double Pung, Short Straight, Terminal Pung, Self-Drawn.
 
-## REGLAMENTO RIICHI (Japonés) - HAN / FU
-- 1 HAN: Riichi, Tsumo (Mano cerrada), Pinfu, Tanyao, Iippatsu, Fanpai, Iipeiko, Haitey, Houtei, Rinshan, Chankan.
-- 2 HAN: Double Riichi, Sanshoku Doujun, Ittsu, Chanta, Toitoi, Sanankou, Sanshoku Doukou, Sankantsu, Chiitoitsu, Honrouto, Shousangen.
-- 3 HAN: Honitsu, Junchan, ryanpeiko.
-- 6 HAN: Chinitsu.
-- YAKUMAN: Kokushi Musou, Suuankou, Daisangen, Shousuushii, Daisuushii, Tsuuuisou, Ryuuisou, Chinroutou, Chuuren Poutou, Suukantsu.
-
-## FÓRMULAS DE CÁLCULO
-- MCR (Tsumo): (Total Puntos + 8) * 3
-- MCR (Ron): Total Puntos + 24
-- Riichi: Puntos = Fu * 2^(Han+2). Redondeo a la centena superior.
+## FÓRMULAS
+- MCR TSUMO: (Suma Base + 8) * 3
+- MCR RON: Suma Base + 24
+- RIICHI: Fu * 2^(Han+2) (centena sup)
 `;
 
-const SYSTEM_CONTEXT = `Eres el Árbitro Supremo de Mahjong. Usa esta TABLA DE REGLAS: ${RULES_MD}
-INSTRUCCIONES: Analiza la jugada, identifica elementos, calcula el total.
+const STRICT_PROMPT = `
+Eres un procesador de datos de Mahjong. PROHIBIDO SALUDAR. PROHIBIDO USAR EXCLAMACIONES.
+Cíñete ESTRICTAMENTE a la tabla de reglas proporcionada:
+${RULES_MD}
+
+INSTRUCCIONES:
+1. Transcribe la ENTRADA de forma literal, sin añadir preámbulos.
+2. Identifica ELEMENTOS.
+3. Calcula SUMA BASE.
+4. Calcula PUNTUACIÓN FINAL según Tsumo/Ron.
+
 FORMATO OBLIGATORIO:
-ENTRADA: [Transcripción]
+ENTRADA: [Texto literal detectado]
 ---
 ELEMENTOS:
-- [Elemento]: [Valor]
-SUMA BASE: [Suma]
-CÁLCULO FINAL:
--- SI ES TSUMO: ([Suma Base] + 8) * 3 = [Puntos]
--- SI ES RON: [Suma Base] + 24 = [Puntos]
-PUNTUACIÓN FINAL: [Valor Real]
+- [Nombre]: [Puntos]
+SUMA BASE: [X]
+PUNTUACIÓN FINAL: [Cálculo matemático según Tsumo/Ron]
 ---
-Breve explicación técnica.`;
+Explicación breve de 1 frase.
+`;
 
 export async function onRequestPost(context) {
   const { request, env, waitUntil } = context;
   const start = Date.now();
-
   try {
     const { audio, text, mode } = await request.json();
-    const modePrompt = mode === 'Riichi' ? "SISTEMA SELECCIONADO: RIICHI." : "SISTEMA SELECCIONADO: MCR.";
-    const parts = [{ text: `${SYSTEM_CONTEXT}\n\n${modePrompt}` }];
-    
-    if (audio) parts.push({ inline_data: { mime_type: "audio/webm", data: audio } }, { text: "Arbitra el audio." });
-    else parts.push({ text: `Arbitra esta jugada: "${text}"` });
+    const model = "gemini-2.5-flash"; 
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${env.GEMINI_KEY}`;
 
-    const inputType = audio ? "audio" : "text";
+    const parts = [
+        { text: `${STRICT_PROMPT}\nMODO SELECCIONADO: ${mode}` },
+        ...(audio ? [{ inline_data: { mime_type: "audio/webm", data: audio } }] : []),
+        { text: text || "Analiza el audio adjunto." }
+    ];
 
-    // Intento con Gemini 2.5 Flash
-    let response = await callGeminiAPI(env.GEMINI_KEY, "gemini-2.5-flash", parts);
-    
-    if (response.error && response.error.includes("not found")) {
-        response = await callGeminiAPI(env.GEMINI_KEY, "gemini-pro", parts);
-    }
-
-    if (response.error) throw new Error(response.error);
-
-    const duration = (Date.now() - start) / 1000;
-
-    // Registro en Grafana Loki (Background)
-    waitUntil(logToLoki(env, { 
-        level: "info", 
-        message: `Processed ${inputType}`, 
-        inputType, 
-        mode, 
-        duration: Date.now() - start 
-    }));
-
-    return new Response(JSON.stringify({ 
-        score: response.text,
-        duration: duration.toFixed(2)
-    }), {
-      headers: { "Content-Type": "application/json" }
-    });
-
-  } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
-  }
-}
-
-async function callGeminiAPI(apiKey, model, parts) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-  try {
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ contents: [{ role: "user", parts }] })
     });
+
     const data = await res.json();
-    if (data.error) return { error: data.error.message };
-    return { text: data.candidates?.[0]?.content?.parts?.[0]?.text || "Sin respuesta." };
-  } catch (e) {
-      return { error: e.message };
+    if (data.error) throw new Error(data.error.message);
+    const resultText = data.candidates[0].content.parts[0].text;
+
+    waitUntil(logToLoki(env, { level: "info", mode, duration: Date.now() - start }));
+    
+    return new Response(JSON.stringify({ 
+        score: resultText,
+        duration: ((Date.now() - start) / 1000).toFixed(2)
+    }), { headers: { "Content-Type": "application/json" } });
+
+  } catch (err) {
+    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
 }
 
