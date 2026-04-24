@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mahjong Scorer v4.16.1 PRO</title>
+    <title>Mahjong Scorer v4.16.3 PRO</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3406/3406059.png">
     <meta name="theme-color" content="#121212">
@@ -109,7 +109,7 @@
 
             <div id="result-container" class="result-container">
                 <div id="input-echo"></div>
-                <div class="result-label">Cálculo de Puntuación</div>
+                <div class="result-label">Resultado del Arbitraje</div>
                 <div id="result"></div>
             </div>
         </div>
@@ -119,7 +119,7 @@
         </footer>
     </div>
 
-    <div class="version-tag">v4.16.1-perf-stats</div>
+    <div class="version-tag">v4.16.3-timer-fix</div>
 
     <script>
         const recordBtn = document.getElementById('recordBtn'), status = document.getElementById('status'), resultContainer = document.getElementById('result-container'), resultDiv = document.getElementById('result'), modeMCR = document.getElementById('modeMCR'), modeRiichi = document.getElementById('modeRiichi'), manualInput = document.getElementById('manualPlay'), inputEcho = document.getElementById('input-echo');
@@ -172,7 +172,7 @@
 
         recordBtn.onclick = async () => {
             if (mediaRecorder && mediaRecorder.state === "recording") {
-                mediaRecorder.stop(); recordBtn.classList.remove('recording'); status.innerText = "Analizando jugada..."; return;
+                mediaRecorder.stop(); recordBtn.classList.remove('recording'); status.innerText = "Analizando audio..."; return;
             }
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
