@@ -45,7 +45,9 @@ INSTRUCCIONES:
 3. Calcula el total siguiendo estrictamente las fórmulas proporcionadas.
 4. Si la entrada es ambigua o incoherente, intenta interpretarla con sentido común de Mahjong, pero prioriza la tabla.
 
-FORMATO DE RESPUESTA:
+FORMATO DE RESPUESTA OBLIGATORIO:
+ENTRADA: [Escribe aquí exactamente lo que has entendido de la jugada]
+---
 - [Elemento]: [Valor]
 - [Elemento]: [Valor]
 --- TOTAL: [Suma total]

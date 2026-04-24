@@ -117,12 +117,13 @@
                 </div>
 
                 <div id="result-container" class="result-container">
+                    <div id="input-echo" style="font-size:0.8rem; color:var(--text-dim); font-style:italic; margin-bottom:15px; padding-bottom:15px; border-bottom:1px solid var(--border); display:none;"></div>
                     <div style="font-size:0.7rem; color:var(--primary); text-transform:uppercase; font-weight:800; margin-bottom:10px; letter-spacing:1px;">Resultado del Arbitraje</div>
                     <div id="result" style="font-size:1.1rem; line-height:1.5; font-weight:600; color:white;"></div>
                 </div>
             </div>
 
-            <div class="version-tag">v4.12.0-manual-input</div>
+            <div class="version-tag">v4.12.2-with-input-echo</div>
         </div>
 
     <script>
@@ -161,7 +162,21 @@
 
         function showResult(score) {
             resultContainer.style.display = 'block';
-            resultDiv.innerText = score || "No se pudo interpretar la jugada.";
+            const inputEcho = document.getElementById('input-echo');
+            
+            if (score && score.includes('ENTRADA:')) {
+                const parts = score.split('---');
+                const detectedInput = parts[0].replace('ENTRADA:', '').trim();
+                const analysis = parts.slice(1).join('---').trim();
+                
+                inputEcho.innerText = `Has dicho: "${detectedInput}"`;
+                inputEcho.style.display = 'block';
+                resultDiv.innerText = analysis || "No se pudo interpretar la jugada.";
+            } else {
+                inputEcho.style.display = 'none';
+                resultDiv.innerText = score || "No se pudo interpretar la jugada.";
+            }
+            
             status.innerText = "¡Listo!";
             manualInput.value = "";
         }
