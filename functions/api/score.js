@@ -1,7 +1,7 @@
 /**
  * API Endpoint: /api/score
- * Ultra-Robust Arbiter for Mahjong
- * v4.16.0-gemini-2.5
+ * Arbiter for Mahjong hands (Voice or Text)
+ * v4.16.1-perf-stats
  */
 
 const RULES_MD = `
@@ -50,6 +50,8 @@ Breve explicación técnica.`;
 
 export async function onRequestPost(context) {
   const { request, env, waitUntil } = context;
+  const start = Date.now();
+
   try {
     const { audio, text, mode } = await request.json();
     const modePrompt = mode === 'Riichi' ? "SISTEMA SELECCIONADO: RIICHI." : "SISTEMA SELECCIONADO: MCR.";
@@ -58,17 +60,32 @@ export async function onRequestPost(context) {
     if (audio) parts.push({ inline_data: { mime_type: "audio/webm", data: audio } }, { text: "Arbitra el audio." });
     else parts.push({ text: `Arbitra esta jugada: "${text}"` });
 
-    // Intento 1: Gemini 1.5 Flash (El más rápido y moderno)
+    const inputType = audio ? "audio" : "text";
+
+    // Intento con Gemini 2.5 Flash
     let response = await callGeminiAPI(env.GEMINI_KEY, "gemini-2.5-flash", parts);
     
-    // Si falla por "modelo no encontrado", intentamos con Gemini Pro (Universal)
     if (response.error && response.error.includes("not found")) {
         response = await callGeminiAPI(env.GEMINI_KEY, "gemini-pro", parts);
     }
 
     if (response.error) throw new Error(response.error);
 
-    return new Response(JSON.stringify({ score: response.text }), {
+    const duration = (Date.now() - start) / 1000;
+
+    // Registro en Grafana Loki (Background)
+    waitUntil(logToLoki(env, { 
+        level: "info", 
+        message: `Processed ${inputType}`, 
+        inputType, 
+        mode, 
+        duration: Date.now() - start 
+    }));
+
+    return new Response(JSON.stringify({ 
+        score: response.text,
+        duration: duration.toFixed(2)
+    }), {
       headers: { "Content-Type": "application/json" }
     });
 
@@ -78,9 +95,7 @@ export async function onRequestPost(context) {
 }
 
 async function callGeminiAPI(apiKey, model, parts) {
-  // Probamos primero con v1beta que es la más compatible con nombres de modelos
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-  
   try {
     const res = await fetch(url, {
       method: "POST",
@@ -93,4 +108,15 @@ async function callGeminiAPI(apiKey, model, parts) {
   } catch (e) {
       return { error: e.message };
   }
+}
+
+async function logToLoki(env, payload) {
+  if (!env.GRAFANA_URL || !env.GRAFANA_USER || !env.GRAFANA_TOKEN) return;
+  const line = JSON.stringify({ app: "mahjong-scorer", ...payload });
+  const logData = { streams: [{ stream: { app: "mahjong-scorer" }, values: [[(Date.now() * 1000000).toString(), line]] }] };
+  await fetch(env.GRAFANA_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": `Basic ${btoa(`${env.GRAFANA_USER}:${env.GRAFANA_TOKEN}`)}` },
+    body: JSON.stringify(logData)
+  }).catch(() => {});
 }

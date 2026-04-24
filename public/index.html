@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mahjong Scorer v4.16.0 PRO</title>
+    <title>Mahjong Scorer v4.16.1 PRO</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3406/3406059.png">
     <meta name="theme-color" content="#121212">
@@ -119,7 +119,7 @@
         </footer>
     </div>
 
-    <div class="version-tag">v4.16.0-gemini-2.5</div>
+    <div class="version-tag">v4.16.1-perf-stats</div>
 
     <script>
         const recordBtn = document.getElementById('recordBtn'), status = document.getElementById('status'), resultContainer = document.getElementById('result-container'), resultDiv = document.getElementById('result'), modeMCR = document.getElementById('modeMCR'), modeRiichi = document.getElementById('modeRiichi'), manualInput = document.getElementById('manualPlay'), inputEcho = document.getElementById('input-echo');
@@ -147,11 +147,11 @@
                     headers: { 'Content-Type': 'application/json' }
                 });
                 const data = await res.json();
-                showResult(data.score);
+                showResult(data.score, data.duration);
             } catch(e) { status.innerText = "Error de conexión"; }
         }
 
-        function showResult(score) {
+        function showResult(score, duration) {
             resultContainer.style.display = 'block';
             let detected = lastInput;
             let analysis = score;
@@ -165,7 +165,8 @@
             inputEcho.innerText = `Has dicho: "${detected}"`;
             inputEcho.style.display = 'block';
             resultDiv.innerText = analysis || "No se pudo interpretar la jugada.";
-            status.innerText = "¡Listo!";
+            
+            status.innerText = `¡Listo! (${duration}s)`;
             manualInput.value = "";
         }
 
@@ -186,7 +187,7 @@
                                 method: 'POST', body: JSON.stringify({ audio: reader.result.split(',')[1], mode: currentMode }), headers: { 'Content-Type': 'application/json' }
                             });
                             const data = await res.json();
-                            showResult(data.score);
+                            showResult(data.score, data.duration);
                         } catch(e) { status.innerText = "Error de audio"; }
                     };
                 };
