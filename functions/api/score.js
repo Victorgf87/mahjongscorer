@@ -1,7 +1,7 @@
 /**
  * API Endpoint: /api/score
- * Arbiter for Mahjong hands (Stable v1)
- * v4.14.7-stable
+ * Ultra-Robust Arbiter for Mahjong
+ * v4.14.8-ultimate-fix
  */
 
 const RULES_MD = `
@@ -34,47 +34,63 @@ const RULES_MD = `
 `;
 
 const SYSTEM_CONTEXT = `Eres el Árbitro Supremo de Mahjong. Usa esta TABLA DE REGLAS: ${RULES_MD}
-Analiza la jugada, identifica elementos y calcula el total final.
-FORMATO:
-ENTRADA: [Lo que has entendido]
+INSTRUCCIONES: Analiza la jugada, identifica elementos, calcula el total.
+FORMATO OBLIGATORIO:
+ENTRADA: [Transcripción]
 ---
 ELEMENTOS:
 - [Elemento]: [Valor]
-SUMA BASE: [Puntos]
+SUMA BASE: [Suma]
 CÁLCULO FINAL:
 -- SI ES TSUMO: ([Suma Base] + 8) * 3 = [Puntos]
 -- SI ES RON: [Suma Base] + 24 = [Puntos]
-PUNTUACIÓN FINAL: [Resultado Final]
+PUNTUACIÓN FINAL: [Valor Real]
 ---
-Breve explicación.`;
+Breve explicación técnica.`;
 
 export async function onRequestPost(context) {
   const { request, env, waitUntil } = context;
   try {
     const { audio, text, mode } = await request.json();
-    const model = "gemini-1.5-flash"; 
-    const url = `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${env.GEMINI_KEY}`;
-
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ role: "user", parts: [
-          { text: `${SYSTEM_CONTEXT}\n\nMODO: ${mode}` },
-          ...(audio ? [{ inline_data: { mime_type: "audio/webm", data: audio } }] : []),
-          { text: text || "Arbitra el audio adjunto." }
-        ]}]
-      })
-    });
-
-    const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
+    const modePrompt = mode === 'Riichi' ? "SISTEMA SELECCIONADO: RIICHI." : "SISTEMA SELECCIONADO: MCR.";
+    const parts = [{ text: `${SYSTEM_CONTEXT}\n\n${modePrompt}` }];
     
-    return new Response(JSON.stringify({ score: data.candidates[0].content.parts[0].text }), {
+    if (audio) parts.push({ inline_data: { mime_type: "audio/webm", data: audio } }, { text: "Arbitra el audio." });
+    else parts.push({ text: `Arbitra esta jugada: "${text}"` });
+
+    // Intento 1: Gemini 1.5 Flash (El más rápido y moderno)
+    let response = await callGeminiAPI(env.GEMINI_KEY, "gemini-1.5-flash", parts);
+    
+    // Si falla por "modelo no encontrado", intentamos con Gemini Pro (Universal)
+    if (response.error && response.error.includes("not found")) {
+        response = await callGeminiAPI(env.GEMINI_KEY, "gemini-pro", parts);
+    }
+
+    if (response.error) throw new Error(response.error);
+
+    return new Response(JSON.stringify({ score: response.text }), {
       headers: { "Content-Type": "application/json" }
     });
 
   } catch (err) {
     return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+  }
+}
+
+async function callGeminiAPI(apiKey, model, parts) {
+  // Probamos primero con v1beta que es la más compatible con nombres de modelos
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contents: [{ role: "user", parts }] })
+    });
+    const data = await res.json();
+    if (data.error) return { error: data.error.message };
+    return { text: data.candidates?.[0]?.content?.parts?.[0]?.text || "Sin respuesta." };
+  } catch (e) {
+      return { error: e.message };
   }
 }
