@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Historial | Mahjong Scorer v2.0</title>
+    <title>Historial Premium | Mahjong Scorer v2.1</title>
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3406/3406059.png">
     <style>
         :root {
@@ -24,14 +24,16 @@
         .main-nav a { color: var(--text-dim); text-decoration: none; font-weight: 700; font-size: 0.85rem; transition: color 0.2s; }
         .main-nav a.active { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 2px; }
         
-        .card { background: var(--surface); border-radius: 28px; padding: 25px; border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.4); width: 100%; margin-bottom: 15px; text-align: left; }
+        .card { background: var(--surface); border-radius: 28px; padding: 30px; border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.4); width: 100%; margin-bottom: 15px; text-align: left; }
         
+        .login-form { text-align: center; }
+        input[type="email"] { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: 12px; margin-bottom: 15px; font-size: 1rem; outline: none; }
+        .btn { background: var(--primary); color: var(--bg); border: none; padding: 14px; border-radius: 12px; font-weight: 800; cursor: pointer; width: 100%; font-size: 1rem; }
+
         .history-item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.75rem; color: var(--text-dim); font-weight: bold; }
         .history-mode { background: rgba(0, 200, 83, 0.1); color: var(--primary); padding: 2px 8px; border-radius: 6px; }
         .history-input { font-style: italic; color: var(--text); margin-bottom: 10px; }
         .history-result { font-size: 0.95rem; line-height: 1.4; border-top: 1px solid var(--border); padding-top: 10px; white-space: pre-line; }
-
-        .premium-badge { background: linear-gradient(45deg, #ffd700, #ff8c00); color: #000; padding: 2px 8px; border-radius: 6px; font-size: 0.6rem; font-weight: 900; text-transform: uppercase; margin-left: 5px; }
 
         .empty-state { text-align: center; color: var(--text-dim); margin-top: 50px; }
         .version-tag { position: fixed; bottom: 10px; right: 15px; font-size: 0.65rem; color: var(--primary); opacity: 0.4; font-weight: bold; }
@@ -42,61 +44,150 @@
         <header class="header">
             <h1 onclick="location.href='index.html'"><span>🀄</span> Scorer</h1>
             <nav class="main-nav">
-                <a href="pairings.html">Torneo</a>
+                <a href="index.html">Voz</a>
                 <a href="history.html" class="active">Historial</a>
             </nav>
         </header>
 
-        <div id="history-container">
-            <div class="empty-state">Cargando tu historial...</div>
+        <div id="auth-view" style="display: none;">
+            <div class="card login-form">
+                <h2 style="color: var(--primary); margin-top: 0;">Entrar al Historial</h2>
+                <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 25px;">Introduce tu email para recibir un enlace de acceso mágico.</p>
+                <input type="email" id="emailInput" placeholder="tu@email.com">
+                <button class="btn" onclick="requestMagicLink()">Recibir Enlace</button>
+                <div id="auth-status" style="margin-top: 15px; font-size: 0.85rem; color: var(--primary); display: none;"></div>
+            </div>
         </div>
+
+        <div id="history-view" style="display: none;">
+            <div id="user-info" style="margin-bottom: 20px; font-size: 0.85rem; color: var(--text-dim); display: flex; justify-content: space-between;">
+                <span id="current-user"></span>
+                <a href="#" onclick="logout()" style="color: var(--danger); text-decoration: none;">Cerrar Sesión</a>
+            </div>
+            <div id="history-container"></div>
+        </div>
+
+        <div id="loading-view" class="empty-state">Verificando sesión...</div>
     </div>
 
-    <div class="version-tag">v2.0.0-premium-alpha</div>
+    <div class="version-tag">v2.1.0-magic-link</div>
 
     <script>
-        async function loadHistory() {
-            let userId = localStorage.getItem('mahjong_user_id');
-            if (!userId) {
-                document.getElementById('history-container').innerHTML = '<div class="empty-state">Aún no has realizado ninguna jugada.</div>';
-                return;
+        async function init() {
+            const params = new URLSearchParams(window.location.search);
+            const token = params.get('token');
+
+            if (token) {
+                await verifyToken(token);
+            } else {
+                checkSession();
             }
+        }
+
+        function checkSession() {
+            const email = localStorage.getItem('mahjong_user_email');
+            if (email) {
+                showHistory(email);
+            } else {
+                showAuth();
+            }
+        }
+
+        async function requestMagicLink() {
+            const email = document.getElementById('emailInput').value;
+            if (!email) return;
+            
+            const btn = document.querySelector('.btn');
+            btn.disabled = true;
+            btn.innerText = 'Enviando...';
 
             try {
-                const res = await fetch(`/api/history?userId=${userId}`);
+                const res = await fetch('/api/auth?action=request', {
+                    method: 'POST',
+                    body: JSON.stringify({ email }),
+                    headers: { 'Content-Type': 'application/json' }
+                });
                 const data = await res.json();
                 
-                if (data.history && data.history.length > 0) {
-                    renderHistory(data.history);
-                } else {
-                    document.getElementById('history-container').innerHTML = '<div class="empty-state">Tu historial está vacío. ¡Empieza a arbitrar!</div>';
-                }
+                const status = document.getElementById('auth-status');
+                status.style.display = 'block';
+                status.innerHTML = `✅ Enlace enviado. Revisa tu bandeja de entrada.<br><br><a href="${data.debugLink}" style="color:white; font-size:0.7rem;">[DEBUG: Clic aquí para entrar directamente]</a>`;
             } catch (e) {
-                document.getElementById('history-container').innerHTML = '<div class="empty-state">Error al cargar historial.</div>';
+                alert("Error al solicitar enlace");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Recibir Enlace';
             }
         }
 
-        function renderHistory(items) {
-            const container = document.getElementById('history-container');
-            container.innerHTML = '';
-            
-            items.forEach(item => {
-                const date = new Date(item.timestamp).toLocaleString();
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <div class="history-item-header">
-                        <span>${date}</span>
-                        <span class="history-mode">${item.mode} <span class="premium-badge">PRO</span></span>
-                    </div>
-                    <div class="history-input">"${item.input_text}"</div>
-                    <div class="history-result">${item.ai_raw_response}</div>
-                `;
-                container.appendChild(card);
-            });
+        async function verifyToken(token) {
+            try {
+                const res = await fetch('/api/auth?action=verify', {
+                    method: 'POST',
+                    body: JSON.stringify({ token }),
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    localStorage.setItem('mahjong_user_email', data.email);
+                    window.location.href = 'history.html'; // Limpiar URL
+                } else {
+                    alert(data.error);
+                    showAuth();
+                }
+            } catch (e) {
+                showAuth();
+            }
         }
 
-        loadHistory();
+        async function showHistory(email) {
+            document.getElementById('loading-view').style.display = 'none';
+            document.getElementById('auth-view').style.display = 'none';
+            document.getElementById('history-view').style.display = 'block';
+            document.getElementById('current-user').innerText = email;
+
+            const container = document.getElementById('history-container');
+            container.innerHTML = '<div class="empty-state">Cargando jugadas...</div>';
+
+            try {
+                const res = await fetch(`/api/history?userId=${email}`);
+                const data = await res.json();
+                if (data.history && data.history.length > 0) {
+                    container.innerHTML = '';
+                    data.history.forEach(item => {
+                        const date = new Date(item.timestamp).toLocaleString();
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.innerHTML = `
+                            <div class="history-item-header">
+                                <span>${date}</span>
+                                <span class="history-mode">${item.mode}</span>
+                            </div>
+                            <div class="history-input">"${item.input_text}"</div>
+                            <div class="history-result">${item.ai_raw_response}</div>
+                        `;
+                        container.appendChild(card);
+                    });
+                } else {
+                    container.innerHTML = '<div class="empty-state">No hay jugadas guardadas en esta cuenta.</div>';
+                }
+            } catch (e) {
+                container.innerHTML = '<div class="empty-state">Error al conectar con la base de datos.</div>';
+            }
+        }
+
+        function showAuth() {
+            document.getElementById('loading-view').style.display = 'none';
+            document.getElementById('auth-view').style.display = 'block';
+            document.getElementById('history-view').style.display = 'none';
+        }
+
+        function logout() {
+            localStorage.removeItem('mahjong_user_email');
+            window.location.reload();
+        }
+
+        init();
     </script>
 </body>
 </html>
