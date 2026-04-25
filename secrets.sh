@@ -67,7 +67,8 @@ case "$1" in
 
     apply)
         KEY=$(get_master_key)
-        PROJECT_NAME=$(grep "name =" wrangler.toml | cut -d'"' -f2 || echo "mahjong-scorer-pwa")
+        PROJECT_NAME=$(grep "name =" wrangler.toml | head -n 1 | cut -d'"' -f2 | tr -d '[:space:]')
+        if [ -z "$PROJECT_NAME" ]; then PROJECT_NAME="mahjong-scorer-pwa"; fi
         echo -e "${BLUE}Subiendo secretos a Cloudflare Pages ($PROJECT_NAME)...${NC}"
         JSON=$(openssl enc -aes-256-cbc -d -salt -pbkdf2 -in "$SECRETS_FILE" -k "$KEY")
         
