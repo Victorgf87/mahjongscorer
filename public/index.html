@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mahjong Scorer v2.0 | Testing</title>
+    <title>Mahjong Scorer v2.1 | Testing</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3406/3406059.png">
     <meta name="theme-color" content="#121212">
@@ -61,7 +61,7 @@
         <header class="header">
             <h1 onclick="location.href='index.html'"><span>🀄</span> Scorer</h1>
             <nav class="main-nav">
-                <a href="pairings.html">Torneo</a>
+                <a href="index.html" class="active">Voz</a>
                 <a href="history.html">Historial</a>
             </nav>
         </header>
@@ -93,12 +93,13 @@
         </div>
     </div>
 
-    <div class="version-tag">v2.0.0-alpha-testing</div>
+    <div class="version-tag">v2.1.0-alpha-testing</div>
 
     <script>
-        let userId = localStorage.getItem('mahjong_user_id');
+        // IDENTIDAD: Email si hay sesión, sino ID aleatorio
+        let userId = localStorage.getItem('mahjong_user_email') || localStorage.getItem('mahjong_user_id');
         if (!userId) {
-            userId = 'user_' + Math.random().toString(36).substr(2, 9);
+            userId = 'anon_' + Math.random().toString(36).substr(2, 9);
             localStorage.setItem('mahjong_user_id', userId);
         }
 
