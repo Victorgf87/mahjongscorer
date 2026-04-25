@@ -2,51 +2,74 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reglas de Mahjong - Riichi y MCR | Scorer</title>
-    <meta name="description" content="Guía completa de reglamentos internacionales de Mahjong: Riichi japonés y MCR chino oficial.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Reglas | Mahjong Scorer v4.19.0</title>
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3406/3406059.png">
     <style>
-        :root { --bg: #121212; --surface: #1e1e1e; --primary: #00c853; --text: #e0e0e0; --text-dim: #9e9e9e; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        nav { margin-bottom: 40px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        nav a { color: var(--primary); text-decoration: none; margin-right: 20px; font-weight: bold; }
-        h1, h2 { color: var(--primary); }
-        .card { background: var(--surface); padding: 25px; border-radius: 20px; margin-bottom: 20px; border: 1px solid #333; }
-        strong { color: #fff; }
+        :root {
+            --bg: #121212; --surface: #1e1e1e; --primary: #00c853;
+            --text: #e0e0e0; --text-dim: #9e9e9e; --border: rgba(255,255,255,0.1);
+        }
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg); color: var(--text); margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        }
+        .container { width: 100%; max-width: 500px; display: flex; flex-direction: column; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; width: 100%; }
+        .header h1 { margin: 0; font-size: 1.5rem; display: flex; align-items: center; gap: 10px; color: var(--primary); font-weight: 800; cursor: pointer; }
+        .header h1 span { font-size: 1.8rem; }
+        
+        .main-nav { display: flex; gap: 15px; }
+        .main-nav a { color: var(--text-dim); text-decoration: none; font-weight: 700; font-size: 0.85rem; transition: color 0.2s; }
+        .main-nav a:hover { color: var(--primary); }
+        .main-nav a.active { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 2px; }
+        
+        .card { background: var(--surface); border-radius: 32px; padding: 35px; border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.4); width: 100%; margin-bottom: 20px; text-align: left; }
+        
+        h2 { color: var(--primary); font-size: 1.2rem; margin-top: 0; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; }
+        p { font-size: 0.95rem; line-height: 1.6; color: var(--text-dim); margin-bottom: 20px; }
+        ul { padding-left: 20px; margin-bottom: 20px; }
+        li { margin-bottom: 12px; font-size: 0.95rem; color: var(--text); }
+        strong { color: var(--primary); }
+
+        .version-tag { position: fixed; bottom: 10px; right: 15px; font-size: 0.65rem; color: var(--primary); opacity: 0.4; font-weight: bold; }
+        @media (max-width: 600px) { .header { flex-direction: column; gap: 15px; } }
     </style>
 </head>
 <body>
     <div class="container">
-        <nav>
-            <a href="/">🏠 Calculadora</a>
-            <a href="/reglas">📖 Reglas</a>
-            <a href="/jugadas">🀄 Jugadas</a>
-        </nav>
+        <header class="header">
+            <h1 onclick="location.href='index.html'"><span>🀄</span> Mahjong Scorer</h1>
+            <nav class="main-nav">
+                <a href="reglas.html" class="active">Reglas</a>
+                <a href="jugadas.html">Jugadas</a>
+                <a href="pairings.html">Torneo</a>
+            </nav>
+        </header>
 
-        <h1>Reglamentos Internacionales</h1>
-        
         <div class="card">
-            <h2>Riichi Mahjong (Japonés)</h2>
-            <p>La variante Riichi es conocida por su profundidad estratégica y el uso de la apuesta <strong>Riichi</strong> cuando se está a una sola pieza de ganar.</p>
+            <h2>MCR (Chinese Official)</h2>
+            <p>El sistema de puntuación oficial internacional. Se basa en acumular puntos mediante la combinación de 81 jugadas posibles.</p>
             <ul>
-                <li><strong>Han:</strong> Es el valor multiplicador de la mano.</li>
-                <li><strong>Fu:</strong> Son los puntos de composición (basados en grupos y esperas).</li>
-                <li><strong>Dora:</strong> Fichas de bonificación que añaden Han sin ser Yakus.</li>
+                <li>Mínimo para ganar: <strong>8 puntos</strong>.</li>
+                <li>Fórmula Tsumo: <strong>(Suma + 8) x 3</strong>.</li>
+                <li>Fórmula Ron: <strong>Suma + 24</strong>.</li>
             </ul>
         </div>
 
         <div class="card">
-            <h2>MCR (Mahjong Competition Rules)</h2>
-            <p>El estándar chino oficial utilizado en competiciones mundiales. Su principal característica es la ausencia de fichas Dora y la necesidad de sumar al menos <strong>8 puntos</strong>.</p>
-            <p>A diferencia del Riichi, no hay distinción de puntuación para el Dealer en cuanto a la recepción de puntos de otros jugadores.</p>
+            <h2>Riichi (Japonés)</h2>
+            <p>La variante japonesa centrada en la apuesta (Riichi) y la ocultación de la mano.</p>
+            <ul>
+                <li>Se puntúa en <strong>Han</strong> (jugadas) y <strong>Fu</strong> (minipuntos).</li>
+                <li>El cálculo es exponencial: <strong>Fu x 2^(Han+2)</strong>.</li>
+                <li>Requiere al menos 1 Yaku (jugada) para ganar.</li>
+            </ul>
         </div>
-
-        <section>
-            <h2>Preguntas Frecuentes</h2>
-            <h3>¿Qué es el arbitraje automático?</h3>
-            <p>Es el uso de modelos de inteligencia artificial para interpretar declaraciones de voz y asignar los puntos correspondientes evitando errores de cálculo manual.</p>
-        </section>
     </div>
+
+    <div class="version-tag">v4.19.0-unified</div>
 </body>
 </html>
