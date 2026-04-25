@@ -1,31 +1,37 @@
-# Roadmap: Mahjong MCR Mastery Tools 🀄🚀
+# Roadmap: Mahjong Scorer PRO - Fase 2 🀄🚀
 
-Este documento detalla las ideas para evolucionar Mahjong Scorer PRO hacia una suite de entrenamiento y mejora táctica, específicamente para **MCR (Mahjong Competition Rules)**.
+Este documento detalla la evolución de la plataforma hacia un ecosistema completo de arbitraje, entrenamiento y consulta profesional.
 
-## Fase 1: Optimización y Fundamentos (Core Tools)
-Enfoque en la barrera de los 8 puntos y la eficiencia básica.
+## 🏁 Milestone v1 (Consolidado)
+- ✅ Arbitraje multimodal (Voz y Texto).
+- ✅ Motor de Emparejamiento de Torneos (Swiss/Balanced).
+- ✅ Diseño unificado y responsivo.
+- ✅ Integración con AdSense para monetización básica.
 
-1.  **8-Point Optimizer (Buscador de Caminos) [V1 IMPLEMENTADA]**: Analizador de mano visual que sugiere rutas críticas para alcanzar el mínimo legal de 8 puntos. Usa Gemini 2.5 Flash para el análisis estratégico.
-2.  **Wait/Shanten Calculator**: Calculadora de esperas y distancia al Tenpai.
-3.  **Discard Efficiency Assistant**: Sugerencias de descarte para maximizar probabilidad matemática de mejora.
-4.  **MCR Fan Evaluator**: Identificación automática de combinaciones (fan) en una mano dada.
+## 🧪 Fase 2: Inteligencia y Persistencia (En Desarrollo)
+Enfoque en convertir la herramienta en un asistente indispensable.
 
-## Fase 2: Entrenamiento y Pedagogía (Training)
-Enfoque en la memoria muscular y el reconocimiento de patrones.
+1.  **Persistencia Relacional (D1):** Almacenamiento de cada arbitraje realizado para generar estadísticas globales.
+2.  **Historial Premium:** Sistema de sesiones vía **Magic Link** que permite a los usuarios acceder a su historial personal desde cualquier dispositivo.
+3.  **Input Visual de Mano:** Selector de fichas por clic (Unicode) para construir manos manualmente sin depender solo de la voz.
+4.  **Chatbot de Conocimiento (Árbitro Internacional AI):** 
+    - Asistente basado en **Gemini 2.5/3.1** con acceso total a las reglas de MCR y Riichi.
+    - Resolución de dudas técnicas en tiempo real.
+    - Consejos de estrategia y defensa.
+5.  **8-Point Optimizer:** Analizador que sugiere rutas para alcanzar los 8 puntos mínimos en MCR.
 
-5.  **Pattern Recognition Flashcards**: Desafíos de tiempo para identificar *fan* en manos aleatorias.
-6.  **Cero a Ocho (Survival Mode)**: Juego contra mazo simulado donde el objetivo es construir un 8-puntos desde una mano desastrosa.
-7.  **Detective de Puntuación (Post-Game Audit)**: Análisis de manos ganadoras para encontrar puntos "perdidos" que el jugador no vio.
-8.  **MCR Rules Coach (AI Voice)**: Asistente por voz que explica por qué una jugada es o no óptima según las reglas.
+## 🎓 Fase 3: Entrenamiento y Pedagogía
+Enfoque en la mejora de habilidades del jugador.
 
-## Fase 3: Análisis Avanzado y Táctica (Advanced)
-Enfoque en la lectura de mesa y estrategia contra oponentes.
+6.  **Detective de Puntuación:** Auditoría de manos para encontrar puntos olvidados.
+7.  **Flashcards de Patrones:** Entrenamiento visual para identificar jugadas de valor rápidamente.
+8.  **Simulador de Descartes:** Sugerencias matemáticas para maximizar la eficiencia de la mano.
 
-9.  **Radar de Amenazas (Opponent Reading)**: Predicción de manos de oponentes basándose en piezas expuestas y descartes.
-10. **Lectura de Río (Discard Analysis)**: Evaluación de fichas seguras (*genbutsu*) y peligrosas.
-11. **Simulador de Universos Paralelos**: Análisis de ramas de decisión ("¿Qué hubiera pasado si no hacía Chi?").
-12. **Calculadora de Probabilidad de Cierre**: Porcentaje real de éxito basado en fichas visibles en mesa.
-13. **Entrenador de Lectura de Mesa**: Situaciones interactivas de defensa y ataque.
+## 📊 Fase 4: Analítica Avanzada
+Enfoque en la lectura de mesa.
+
+9.  **Radar de Amenazas:** Predicción de jugadas de oponentes basándose en descartes.
+10. **Lectura de Río:** Evaluación de fichas seguras y peligrosas.
 
 ---
-*Mantenido por el Agente Gemini CLI en colaboración con el usuario.*
+*Mantenido por el Arquitecto Senior en colaboración con el usuario - Abril 2026*
