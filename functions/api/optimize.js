@@ -1,6 +1,7 @@
 /**
  * API Endpoint: /api/optimize
  * MCR Strategy Optimizer for Mahjong Mastery
+ * v4.21.0-senior-architect-d1
  */
 
 const RULES_MD = `
@@ -38,14 +39,14 @@ Usa un tono profesional, directo y experto. Evita introducciones innecesarias.
 `;
 
 export async function onRequestPost(context) {
-  const { request, env } = context;
+  const { request, env, waitUntil } = context;
   const start = Date.now();
 
   try {
-    const { hand } = await request.json();
+    const { hand, userId } = await request.json();
     if (!hand) return new Response(JSON.stringify({ error: "No hand provided" }), { status: 400 });
 
-    const model = "gemini-2.5-flash"; // Usamos el modelo configurado en el proyecto
+    const model = "gemini-2.5-flash"; 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${env.GEMINI_KEY}`;
 
     const prompt = `
@@ -74,6 +75,18 @@ ${RULES_MD}
     const resultText = data.candidates[0].content.parts[0].text;
     const duration = ((Date.now() - start) / 1000).toFixed(2);
 
+    // --- PERSISTENCIA EN D1 ---
+    if (env.DB) {
+        waitUntil(saveOptimizationToDB(env.DB, {
+            hand,
+            ai_raw_response: resultText,
+            user_id: userId || 'anonymous'
+        }));
+    }
+
+    // --- LOGS EN LOKI ---
+    waitUntil(logToLoki(env, { level: "info", mode: "optimize", duration, tier: "premium", model }));
+
     return new Response(JSON.stringify({ analysis: resultText, duration }), {
       headers: { "Content-Type": "application/json" }
     });
@@ -81,4 +94,34 @@ ${RULES_MD}
   } catch (err) {
     return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
+}
+
+async function saveOptimizationToDB(db, data) {
+    try {
+        await db.prepare(`
+            INSERT INTO plays (mode, input_text, ai_raw_response, user_id)
+            VALUES (?, ?, ?, ?)
+        `).bind("MCR_OPTIMIZE", data.hand, data.ai_raw_response, data.user_id).run();
+    } catch (e) {
+        console.error("D1 Error:", e.message);
+    }
+}
+
+async function logToLoki(env, payload) {
+  if (!env.GRAFANA_URL || !env.GRAFANA_USER || !env.GRAFANA_TOKEN) return;
+  const line = JSON.stringify({ app: "mahjong-scorer", ...payload });
+  const logData = { 
+    streams: [{ 
+      stream: { app: "mahjong-scorer" }, 
+      values: [[(Date.now() * 1000000).toString(), line]] 
+    }] 
+  };
+  await fetch(env.GRAFANA_URL, {
+    method: "POST",
+    headers: { 
+      "Content-Type": "application/json", 
+      "Authorization": `Basic ${btoa(`${env.GRAFANA_USER}:${env.GRAFANA_TOKEN}`)}` 
+    },
+    body: JSON.stringify(logData)
+  }).catch(() => {});
 }

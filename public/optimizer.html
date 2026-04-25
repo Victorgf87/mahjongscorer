@@ -97,6 +97,12 @@
     </div>
 
     <script>
+        let userId = localStorage.getItem('mahjong_user_id');
+        if (!userId) {
+            userId = 'user_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('mahjong_user_id', userId);
+        }
+
         const hand = [];
         const tilesData = {
             characters: ['🀇', '🀈', '🀉', '🀊', '🀋', '🀌', '🀍', '🀎', '🀏'],
@@ -143,7 +149,7 @@
                 btn.onclick = () => removeFromHand(i);
                 handEl.appendChild(btn);
             });
-            analyzeBtn.disabled = hand.length < 5; // Mínimo 5 fichas para una sugerencia básica
+            analyzeBtn.disabled = hand.length < 5;
         }
 
         analyzeBtn.onclick = async () => {
@@ -155,7 +161,7 @@
                 const res = await fetch('/api/optimize', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ hand: hand.join('') })
+                    body: JSON.stringify({ hand: hand.join(''), userId })
                 });
                 const data = await res.json();
                 showResults(data.analysis);
@@ -170,10 +176,7 @@
         function showResults(analysis) {
             resultsEl.style.display = 'block';
             resultsEl.innerHTML = '';
-            
-            // Suponemos que la IA devuelve un texto con secciones separadas por "Ruta"
             const routes = analysis.split(/Ruta \d+:/i).filter(r => r.trim());
-            
             routes.forEach((route, i) => {
                 const card = document.createElement('div');
                 card.className = 'route-card';
@@ -183,7 +186,6 @@
                 `;
                 resultsEl.appendChild(card);
             });
-            
             if (routes.length === 0) {
                 resultsEl.innerHTML = `<div class="route-content">${analysis}</div>`;
             }
