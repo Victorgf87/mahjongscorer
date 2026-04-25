@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hand Builder | Mahjong Scorer Testing</title>
+    <style>
+        :root {
+            --bg: #121212; --surface: #1e1e1e; --primary: #00c853;
+            --text: #e0e0e0; --text-dim: #9e9e9e; --border: rgba(255,255,255,0.1);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg); color: var(--text); margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+        }
+        .container { width: 100%; max-width: 600px; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .header h1 { margin: 0; font-size: 1.5rem; display: flex; align-items: center; gap: 10px; color: var(--primary); font-weight: 800; }
+        
+        .card { background: var(--surface); border-radius: 32px; padding: 30px; text-align: center; border: 1px solid var(--border); box-shadow: 0 10px 40px rgba(0,0,0,0.4); margin-bottom: 25px; }
+        
+        .tile-grid { display: grid; grid-template-columns: repeat(9, 1fr); gap: 5px; margin-bottom: 20px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 16px; }
+        .tile { 
+            font-size: 2rem; cursor: pointer; background: #fff; color: #000; 
+            border-radius: 6px; display: flex; align-items: center; justify-content: center;
+            aspect-ratio: 3/4; transition: transform 0.1s; border: 1px solid #ccc;
+        }
+        .tile:hover { transform: scale(1.1); z-index: 10; }
+        .tile:active { transform: scale(0.9); }
+        .tile.honor { background: #f0f0f0; }
+
+        .hand-display { 
+            background: rgba(0,0,0,0.3); border: 2px dashed var(--border); 
+            min-height: 80px; border-radius: 20px; margin-top: 20px; padding: 15px;
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+        }
+        .hand-tile { 
+            font-size: 1.8rem; background: #fff; color: #000; 
+            border-radius: 4px; padding: 4px; position: relative;
+        }
+        .hand-tile .remove {
+            position: absolute; top: -8px; right: -8px; background: var(--danger);
+            color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 10px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            border: 2px solid var(--bg);
+        }
+
+        .btn { 
+            background: var(--primary); color: var(--bg); border: none; padding: 16px; 
+            border-radius: 16px; font-weight: 800; cursor: pointer; width: 100%; font-size: 1rem; 
+            margin-top: 20px;
+        }
+        
+        .section-label { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; margin: 15px 0 10px; text-align: left; width: 100%; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><span>🀄</span> Hand Builder</h1>
+        </header>
+
+        <div class="card">
+            <div class="section-label">Bambú (Souzu)</div>
+            <div class="tile-grid" id="bamboo-grid"></div>
+
+            <div class="section-label">Círculos (Pinzu)</div>
+            <div class="tile-grid" id="dots-grid"></div>
+
+            <div class="section-label">Caracteres (Manzu)</div>
+            <div class="tile-grid" id="chars-grid"></div>
+
+            <div class="section-label">Honores (Vientos/Dragones)</div>
+            <div class="tile-grid" id="honors-grid"></div>
+
+            <div class="section-label">Tu Mano (Max 14)</div>
+            <div class="hand-display" id="hand"></div>
+
+            <button class="btn" onclick="submitHand()">ARBITRAR MANO SELECCIONADA</button>
+        </div>
+    </div>
+
+    <script>
+        const hand = [];
+        const tiles = {
+            bamboo: ['🀐','🀑','🀒','🀓','🀔','🀕','🀖','🀗','🀘'],
+            dots: ['🀙','🀚','🀛','🀜','🀝','🀞','🀟','🀠','🀡'],
+            chars: ['🀇','🀈','🀉','🀊','🀋','🀌','🀍','🀎','🀏'],
+            honors: ['🀀','🀁','🀂','🀃','🀄','🀅','🀆']
+        };
+
+        function init() {
+            renderGrid('bamboo-grid', tiles.bamboo);
+            renderGrid('dots-grid', tiles.dots);
+            renderGrid('chars-grid', tiles.chars);
+            renderGrid('honors-grid', tiles.honors);
+        }
+
+        function renderGrid(id, tilesArr) {
+            const grid = document.getElementById(id);
+            tilesArr.forEach(t => {
+                const el = document.createElement('div');
+                el.className = 'tile';
+                el.innerText = t;
+                el.onclick = () => addTile(t);
+                grid.appendChild(el);
+            });
+        }
+
+        function addTile(t) {
+            if (hand.length >= 14) return alert("Mano completa");
+            hand.push(t);
+            renderHand();
+        }
+
+        function removeTile(idx) {
+            hand.splice(idx, 1);
+            renderHand();
+        }
+
+        function renderHand() {
+            const container = document.getElementById('hand');
+            container.innerHTML = '';
+            hand.forEach((t, i) => {
+                const el = document.createElement('div');
+                el.className = 'hand-tile';
+                el.innerText = t;
+                const remove = document.createElement('div');
+                remove.className = 'remove';
+                remove.innerText = '✕';
+                remove.onclick = () => removeTile(i);
+                el.appendChild(remove);
+                container.appendChild(el);
+            });
+        }
+
+        async function submitHand() {
+            if (hand.length < 13) return alert("Selecciona al menos 13 fichas");
+            const handText = hand.join(', ');
+            // Redirigir al Scorer con la jugada en la URL (o usar fetch)
+            window.location.href = `index.html?play=${encodeURIComponent(handText)}`;
+        }
+
+        init();
+    </script>
+</body>
+</html>
